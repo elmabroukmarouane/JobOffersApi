@@ -3,7 +3,9 @@ using JobsOffer.Api.Business.Services.Interfaces;
 using JobsOffer.Api.Infrastructure.Models.Classes;
 using JobsOffer.Api.Server.DtoModel.Models;
 using JobsOffer.Api.Server.GenericController;
+using JobsOffer.Api.Server.RealTime.Class;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace JobsOffer.Api.Server.Controllers
 {
@@ -14,7 +16,8 @@ namespace JobsOffer.Api.Server.Controllers
         public DomainJobController(
             IGenericService<DomainJob> genericService, 
             IMapper mapper, ILogger<GenericController<DomainJob, DomainJobViewModel>> logger,
-            IHostEnvironment hostEnvironment) : base(genericService, mapper, logger, hostEnvironment)
+            IHostEnvironment hostEnvironment, 
+            IHubContext<RealTimeHub> hubContext) : base(genericService, mapper, logger, hostEnvironment, hubContext)
         {
         }
     }
