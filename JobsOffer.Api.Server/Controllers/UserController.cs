@@ -5,8 +5,10 @@ using JobsOffer.Api.Business.Services.Interfaces;
 using JobsOffer.Api.Infrastructure.Models.Classes;
 using JobsOffer.Api.Server.DtoModel.Models;
 using JobsOffer.Api.Server.Extensions.Logging;
+using JobsOffer.Api.Server.RealTime.Class;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 
@@ -22,6 +24,7 @@ namespace JobsOffer.Api.Server.Controllers
         protected readonly ILogger _logger;
         protected readonly IHostEnvironment _hostEnvironment;
         protected readonly IConfiguration _configuration;
+        protected readonly IHubContext<RealTimeHub> _realTimeHub;
         #endregion
 
         #region CONSTRUCTOR
@@ -30,13 +33,16 @@ namespace JobsOffer.Api.Server.Controllers
             IMapper mapper,
             ILogger<GenericController.GenericController<User, UserViewModel>> logger,
             IHostEnvironment hostEnvironment,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IHubContext<RealTimeHub> realTimeHub)
         {
             _userService = userService ?? throw new ArgumentException(null, nameof(userService));
             _mapper = mapper ?? throw new ArgumentNullException(null, nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(null, nameof(logger));
             _hostEnvironment = hostEnvironment ?? throw new ArgumentNullException(null, nameof(hostEnvironment));
             _configuration = configuration ?? throw new ArgumentNullException(null, nameof(configuration));
+            _realTimeHub = realTimeHub ?? throw new ArgumentNullException(null, nameof(realTimeHub));
+
         }
         #endregion
 
@@ -155,6 +161,7 @@ namespace JobsOffer.Api.Server.Controllers
                     });
                 }
                 var mapperRow = _mapper.Map<UserViewModel>(row);
+                await _realTimeHub.Clients.All.SendAsync("Row Created !", mapperRow);
                 return Ok(mapperRow);
             }
             catch (Exception ex)
@@ -193,6 +200,7 @@ namespace JobsOffer.Api.Server.Controllers
                     });
                 }
                 var mapperRows = _mapper.Map<IList<UserViewModel>>(rows);
+                await _realTimeHub.Clients.All.SendAsync("Rows Created !", mapperRows);
                 return Ok(mapperRows);
             }
             catch (Exception ex)
@@ -233,6 +241,7 @@ namespace JobsOffer.Api.Server.Controllers
                     });
                 }
                 var mapperRow = _mapper.Map<UserViewModel>(row);
+                await _realTimeHub.Clients.All.SendAsync("Row Updated !", mapperRow);
                 return Ok(mapperRow);
             }
             catch (Exception ex)
@@ -271,6 +280,7 @@ namespace JobsOffer.Api.Server.Controllers
                     });
                 }
                 var mapperRows = _mapper.Map<IList<UserViewModel>>(rows);
+                await _realTimeHub.Clients.All.SendAsync("Rows Updated !", mapperRows);
                 return Ok(mapperRows);
             }
             catch (Exception ex)
@@ -311,6 +321,7 @@ namespace JobsOffer.Api.Server.Controllers
                     });
                 }
                 var mapperRow = _mapper.Map<UserViewModel>(row);
+                await _realTimeHub.Clients.All.SendAsync("Row Deleted !", mapperRow);
                 return Ok(mapperRow);
             }
             catch (Exception ex)
@@ -349,6 +360,7 @@ namespace JobsOffer.Api.Server.Controllers
                     });
                 }
                 var mapperRows = _mapper.Map<IList<UserViewModel>>(rows);
+                await _realTimeHub.Clients.All.SendAsync("Rows Deleted !", mapperRows);
                 return Ok(mapperRows);
             }
             catch (Exception ex)

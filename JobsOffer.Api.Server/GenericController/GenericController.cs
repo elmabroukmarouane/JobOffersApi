@@ -4,8 +4,10 @@ using JobsOffer.Api.Business.Helpers.LambdaManagement.Helper;
 using JobsOffer.Api.Business.Services.Interfaces;
 using JobsOffer.Api.Infrastructure.Models.Classes;
 using JobsOffer.Api.Server.Extensions.Logging;
+using JobsOffer.Api.Server.RealTime.Class;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 
@@ -23,6 +25,7 @@ namespace JobsOffer.Api.Server.GenericController
         protected readonly IMapper _mapper;
         protected readonly ILogger<GenericController<TEntity, TEntityViewModel>> _logger;
         protected readonly IHostEnvironment _hostEnvironment;
+        protected readonly IHubContext<RealTimeHub> _realTimeHub;
         #endregion
 
         #region CONSTRUCTOR
@@ -30,12 +33,14 @@ namespace JobsOffer.Api.Server.GenericController
             IGenericService<TEntity> genericService,
             IMapper mapper,
             ILogger<GenericController<TEntity, TEntityViewModel>> logger,
-            IHostEnvironment hostEnvironment)
+            IHostEnvironment hostEnvironment,
+            IHubContext<RealTimeHub> hubContext)
         {
             _genericService = genericService ?? throw new ArgumentException(null, nameof(genericService));
             _mapper = mapper ?? throw new ArgumentNullException(null, nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(null, nameof(logger));
             _hostEnvironment = hostEnvironment ?? throw new ArgumentNullException(null,nameof(hostEnvironment));
+            _realTimeHub = hubContext ?? throw new ArgumentNullException(null, nameof(hubContext));
         }
         #endregion
 
@@ -143,6 +148,7 @@ namespace JobsOffer.Api.Server.GenericController
                     });
                 }
                 var reverseMapEntity = _mapper.Map<TEntity>(entity);
+                reverseMapEntity.CreateDate = DateTime.Now;
                 var row = await _genericService.CreateAsync(reverseMapEntity);
                 if (row == null)
                 {
@@ -154,6 +160,7 @@ namespace JobsOffer.Api.Server.GenericController
                     });
                 }
                 var mapperRow = _mapper.Map<TEntityViewModel>(row);
+                await _realTimeHub.Clients.All.SendAsync("Row Created !", mapperRow);
                 return Ok(mapperRow);
             }
             catch (Exception ex)
@@ -181,6 +188,10 @@ namespace JobsOffer.Api.Server.GenericController
                     });
                 }
                 var reverseMapEntities = _mapper.Map<IList<TEntity>>(entities);
+                foreach (var reverseMapEntity in reverseMapEntities)
+                {
+                    reverseMapEntity.CreateDate = DateTime.Now;
+                }
                 var rows = await _genericService.CreateAsync(reverseMapEntities);
                 if (rows == null)
                 {
@@ -192,6 +203,7 @@ namespace JobsOffer.Api.Server.GenericController
                     });
                 }
                 var mapperRows = _mapper.Map<IList<TEntityViewModel>>(rows);
+                await _realTimeHub.Clients.All.SendAsync("Rows Created !", mapperRows);
                 return Ok(mapperRows);
             }
             catch (Exception ex)
@@ -206,8 +218,8 @@ namespace JobsOffer.Api.Server.GenericController
         #endregion
 
         #region UPDATE
-        [HttpPut("id:int")]
-        public virtual async Task<IActionResult> Put(TEntityViewModel? entity, int id)
+        [HttpPut]
+        public virtual async Task<IActionResult> Put(TEntityViewModel? entity)
         {
             try
             {
@@ -221,6 +233,7 @@ namespace JobsOffer.Api.Server.GenericController
                     });
                 }
                 var reverseMapEntity = _mapper.Map<TEntity>(entity);
+                reverseMapEntity.UpdateDate = DateTime.Now;
                 var row = await _genericService.UpdateAsync(reverseMapEntity);
                 if (row == null)
                 {
@@ -232,6 +245,7 @@ namespace JobsOffer.Api.Server.GenericController
                     });
                 }
                 var mapperRow = _mapper.Map<TEntityViewModel>(row);
+                await _realTimeHub.Clients.All.SendAsync("Row Updated !", mapperRow);
                 return Ok(mapperRow);
             }
             catch (Exception ex)
@@ -259,6 +273,10 @@ namespace JobsOffer.Api.Server.GenericController
                     });
                 }
                 var reverseMapEntities = _mapper.Map<IList<TEntity>>(entities);
+                foreach (var reverseMapEntity in reverseMapEntities)
+                {
+                    reverseMapEntity.UpdateDate = DateTime.Now;
+                }
                 var rows = await _genericService.UpdateAsync(reverseMapEntities);
                 if (rows == null)
                 {
@@ -270,6 +288,7 @@ namespace JobsOffer.Api.Server.GenericController
                     });
                 }
                 var mapperRows = _mapper.Map<IList<TEntityViewModel>>(rows);
+                await _realTimeHub.Clients.All.SendAsync("Rows Updated !", mapperRows);
                 return Ok(mapperRows);
             }
             catch (Exception ex)
@@ -284,8 +303,8 @@ namespace JobsOffer.Api.Server.GenericController
         #endregion
 
         #region DELETE
-        [HttpDelete("{id:int}")]
-        public virtual async Task<IActionResult> Delete(TEntityViewModel? entity, int id)
+        [HttpDelete]
+        public virtual async Task<IActionResult> Delete(TEntityViewModel? entity)
         {
             try
             {
@@ -310,6 +329,7 @@ namespace JobsOffer.Api.Server.GenericController
                     });
                 }
                 var mapperRow = _mapper.Map<TEntityViewModel>(row);
+                await _realTimeHub.Clients.All.SendAsync("Row Deleted !", mapperRow);
                 return Ok(mapperRow);
             }
             catch (Exception ex)
@@ -348,6 +368,7 @@ namespace JobsOffer.Api.Server.GenericController
                     });
                 }
                 var mapperRows = _mapper.Map<IList<TEntityViewModel>>(rows);
+                await _realTimeHub.Clients.All.SendAsync("Rows Deleted !", mapperRows);
                 return Ok(mapperRows);
             }
             catch (Exception ex)

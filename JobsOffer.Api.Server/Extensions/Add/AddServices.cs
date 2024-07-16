@@ -11,6 +11,7 @@ using JobsOffer.Api.Business.Cqrs.Commands.Interfaces;
 using JobsOffer.Api.Business.Cqrs.Commands.Classes;
 using JobsOffer.Api.Business.Cqrs.Queries.Classes;
 using JobsOffer.Api.Business.Cqrs.Queries.Interfaces;
+using JobsOffer.Api.Server.RealTime.Class;
 
 namespace JobsOffer.Api.Server.Extensions.Add;
 public static class AddServices
@@ -62,6 +63,8 @@ public static class AddServices
         self.AddTransient<IGenericService<WebSite>, GenericService<WebSite>>();
 
         self.AddTransient<IRedisService, RedisService>();
+
+        self.AddTransient<RealTimeHub>();
 
         self.AddSingleton(configuration);
         self.AddSingleton(hostEnvironment);
