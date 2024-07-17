@@ -34,7 +34,7 @@ namespace JobsOffer.Api.Server.RealTime.Class
             await Clients.All.SendAsync("SendEntitesToAll", entities);
         }
 
-        public override async Task OnDisconnectedAsync(Exception? exception = default)
+        public override async Task OnDisconnectedAsync(Exception? exception = null)
         {
             ConnectedUsers.Remove(Context.ConnectionId);
             await base.OnDisconnectedAsync(exception);

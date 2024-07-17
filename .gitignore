@@ -17,3 +17,9 @@ JobsOffer.Api.Test/obj
 .vscode
 .vs
 .sonarqube
+JobsOffer.Api.Infrastructure/.sonarqube
+JobsOffer.Api.Server/.sonarqube
+JobsOffer.Api.Domain/.sonarqube
+JobsOffer.Api.UnitOfWork/.sonarqube
+JobsOffer.Api.Business/.sonarqube
+JobsOffer.Api.Test/.sonarqube

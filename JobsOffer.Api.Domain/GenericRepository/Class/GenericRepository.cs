@@ -55,8 +55,6 @@ namespace JobsOffer.Api.Domain.GenericRepository.Class
         #endregion
 
         #region READ
-        public virtual async Task<IList<TEntity>> GetEntitiesAsync() => await _dbSet.ToListAsync(); 
-
         public virtual IQueryable<TEntity> GetEntitiesAsync(
             Expression<Func<TEntity, bool>>? expression = null, 
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orberBy = null, 
