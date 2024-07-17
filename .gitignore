@@ -16,3 +16,4 @@ JobsOffer.Api.Test/bin
 JobsOffer.Api.Test/obj
 .vscode
 .vs
+.sonarqube
