@@ -7,7 +7,7 @@ using JobsOffer.Api.Server.RealTime.Class;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
-namespace JobsOffer.Api.Server.Controllers
+namespace JobsOffer.Api.Server.FavoriMicroService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

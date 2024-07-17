@@ -7,17 +7,16 @@ using JobsOffer.Api.Server.RealTime.Class;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
-namespace JobsOffer.Api.Server.Controllers
+namespace JobsOffer.Api.Server.ProfilMicroService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProfilDomainJobController : GenericController<ProfilDomainJob, ProfilDomainJobViewModel>
+    public class ProfilController : GenericController<Profil, ProfilViewModel>
     {
-        public ProfilDomainJobController(
-            
-            IGenericService<ProfilDomainJob> genericService, 
+        public ProfilController(
+            IGenericService<Profil> genericService, 
             IMapper mapper, 
-            ILogger<GenericController<ProfilDomainJob, ProfilDomainJobViewModel>> logger, 
+            ILogger<GenericController<Profil, ProfilViewModel>> logger, 
             IHostEnvironment hostEnvironment,
             IHubContext<RealTimeHub> hubContext) : base(genericService, mapper, logger, hostEnvironment, hubContext)
         {

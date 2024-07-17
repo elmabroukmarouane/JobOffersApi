@@ -14,8 +14,8 @@ namespace JobsOffer.Api.Server.DtoModel.Profiles
             CreateMap<FavoriViewModel, Favori>();
             CreateMap<Job, JobViewModel>();
             CreateMap<JobViewModel, Job>();
-            CreateMap<Profil, ProfilViewModel>();
-            CreateMap<ProfilViewModel, Profil>();
+            CreateMap<Infrastructure.Models.Classes.Profil, ProfilViewModel>();
+            CreateMap<ProfilViewModel, Infrastructure.Models.Classes.Profil>();
             CreateMap<ProfilDomainJob, ProfilDomainJobViewModel>();
             CreateMap<ProfilDomainJobViewModel, ProfilDomainJob>();
             CreateMap<User, UserViewModel>();
