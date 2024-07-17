@@ -46,4 +46,4 @@ app.UseJWT();
 app.MapControllers();
 app.MapHub<RealTimeHub>("/realTimeHub");
 
-app.Run();
+await app.RunAsync();

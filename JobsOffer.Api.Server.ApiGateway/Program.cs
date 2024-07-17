@@ -28,4 +28,4 @@ app.MapControllers();
 
 app.UseOcelot().Wait();
 
-app.Run();
+await app.RunAsync();
