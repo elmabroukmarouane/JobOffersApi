@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 
-namespace JobsOffer.Api.Server.Controllers
+namespace JobsOffer.Api.Server.UserMicroService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
