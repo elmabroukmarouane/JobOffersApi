@@ -37,11 +37,6 @@ namespace JobsOffer.Api.Business.Services.Classes
         #endregion
 
         #region READ
-        public async Task<IList<User>> GetEntitiesAsync()
-        {
-            return await _genericGetEntitiesQuery.Handle();
-        }
-
         public IQueryable<User> GetEntitiesAsync(Expression<Func<User, bool>>? expression = null, Func<IQueryable<User>, IOrderedQueryable<User>>? orberBy = null, string? includes = null, string splitChar = ",", bool disableTracking = true, int take = 0, int offset = 0)
         {
             return _genericGetEntitiesQuery.Handle(expression, orberBy, includes, splitChar, disableTracking, take, offset);

@@ -21,8 +21,6 @@ namespace JobsOffer.Api.Domain.GenericRepository.Interface
         #endregion
 
         #region READ
-        Task<IList<TEntity>> GetEntitiesAsync();
-        //Task<IList<TEntity>> GetEntitiesAsync(
         IQueryable<TEntity> GetEntitiesAsync(
             Expression<Func<TEntity, bool>>? expression = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orberBy = null,

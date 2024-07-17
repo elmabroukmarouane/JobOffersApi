@@ -17,7 +17,6 @@ namespace JobsOffer.Api.Business.Cqrs.Queries.Classes
         #endregion
 
         #region METHODS
-        public async Task<IList<TEntity>> Handle() => await _unitOfWork.GetGenericRepository<TEntity>().GetEntitiesAsync();
 
         public IQueryable<TEntity> Handle(
             Expression<Func<TEntity, bool>>? expression = null, 

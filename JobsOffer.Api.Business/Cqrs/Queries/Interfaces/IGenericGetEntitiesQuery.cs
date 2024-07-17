@@ -5,7 +5,6 @@ namespace JobsOffer.Api.Business.Cqrs.Queries.Interfaces
 {
     public interface IGenericGetEntitiesQuery<TEntity> where TEntity : Entity
     {
-        Task<IList<TEntity>> Handle();
         IQueryable<TEntity> Handle(
             Expression<Func<TEntity, bool>>? expression = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orberBy = null,

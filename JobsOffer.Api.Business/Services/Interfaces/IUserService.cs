@@ -6,7 +6,6 @@ namespace JobsOffer.Api.Business.Services.Interfaces
     public interface IUserService
     {
         #region READ
-        Task<IList<User>> GetEntitiesAsync();
         IQueryable<User> GetEntitiesAsync(
             Expression<Func<User, bool>>? expression = null,
             Func<IQueryable<User>, IOrderedQueryable<User>>? orberBy = null,
