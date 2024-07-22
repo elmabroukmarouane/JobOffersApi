@@ -89,10 +89,10 @@ namespace JobsOffer.Api.Business.Services.Classes
         {
             if (user is null) return null;
             if (string.IsNullOrEmpty(user.Email) || string.IsNullOrEmpty(user.Password)) return null;
-            var attempingUser = await _genericGetEntitiesQuery.Handle(expression : x => x.Email!.ToLower().Trim() == user.Email).SingleOrDefaultAsync();
+            var attempingUser = _genericGetEntitiesQuery.Handle(expression : x => x.Email!.ToLower().Trim() == user.Email).SingleOrDefault();
             if (attempingUser is null) return null;
             user = Helper.EncryptPassword(user);
-            if (attempingUser.Password == user.Password)
+            if (attempingUser.Email == user.Email && attempingUser.Password == user.Password)
             {
                 attempingUser.IsOnLine = true;
                 await _userUpdateCommand.Handle(attempingUser, true);
@@ -103,7 +103,8 @@ namespace JobsOffer.Api.Business.Services.Classes
 
         public async Task<bool> Logout(User user)
         {
-            var loggedUser = await _genericGetEntitiesQuery.Handle(expression: x => x.Id == user.Id).SingleOrDefaultAsync();
+            if(user is null) return false;
+            var loggedUser = _genericGetEntitiesQuery.Handle(expression: x => x.Id == user.Id && x.Email == user.Email).SingleOrDefault();
             if (loggedUser is null) return false;
             loggedUser.IsOnLine = false;
             await _userUpdateCommand.Handle(loggedUser, true);

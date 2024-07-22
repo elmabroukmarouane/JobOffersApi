@@ -20,6 +20,9 @@ public static class AddConnexion
                     UsePostgreSql(PostgreSqlConnectionStringBuilderFunction("PostgreSqlConnection", "PostgreSqlDbPassword", configuration), options, configuration, env);
                     AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
                     break;
+                case "SQLITE":
+                    UseSqlite("SqliteConnection", options, configuration, env);
+                    break;
                 default:
                     UseSqlServer(SqlServerConnectionStringBuilderFunction("SqlServerConnection", "SqlServerDbPassword", configuration), options, configuration, env);
                     break;
@@ -46,11 +49,14 @@ public static class AddConnexion
                             options => options.EnableRetryOnFailure()
                         ).EnableSensitiveDataLogging().EnableDetailedErrors();
             }
-            options
-                .UseSqlServer(
-                        connectionString,
-                        options => options.EnableRetryOnFailure()
-                    );
+            else
+            {
+                options
+                    .UseSqlServer(
+                            connectionString,
+                            options => options.EnableRetryOnFailure()
+                        );
+            }
         }
 
         static string PostgreSqlConnectionStringBuilderFunction(string connectionStringName, string ConnectionConfigPart,
@@ -62,6 +68,7 @@ public static class AddConnexion
             builer.Password = configuration.GetConnectionString(ConnectionConfigPart);
             return builer.ConnectionString;
         }
+
         static void UsePostgreSql(string connectionString, DbContextOptionsBuilder options,
             IConfiguration configuration, IHostEnvironment env)
         {
@@ -72,10 +79,31 @@ public static class AddConnexion
                             options => options.EnableRetryOnFailure()
                         ).EnableSensitiveDataLogging().EnableDetailedErrors();
             }
-            options.UseNpgsql(
-                connectionString,
-                options => options.EnableRetryOnFailure()
-                );
+            else
+            {
+                options.UseNpgsql(
+                    connectionString,
+                    options => options.EnableRetryOnFailure()
+                    );
+            }
+        }
+
+        static void UseSqlite(string connectionString, DbContextOptionsBuilder options,
+            IConfiguration configuration, IHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                var cnx = configuration.GetConnectionString(connectionString);
+                options.UseSqlite(
+                    configuration.GetConnectionString(connectionString)
+                   ).EnableSensitiveDataLogging().EnableDetailedErrors(); ;
+            }
+            else
+            {
+                options.UseSqlite(
+                    configuration.GetConnectionString(connectionString)
+                    );
+            }
         }
     }
 }

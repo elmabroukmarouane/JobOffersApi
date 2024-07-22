@@ -3,6 +3,7 @@ using System;
 using JobsOffer.Api.Infrastructure.DatabaseContext.DbContextJobsOffer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobsOffer.Api.Infrastructure.Migrations
 {
     [DbContext(typeof(DbContextJobsOffer))]
-    partial class DbContextJobsOfferModelSnapshot : ModelSnapshot
+    [Migration("20240722192404_SqliteMigration")]
+    partial class SqliteMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.7");
