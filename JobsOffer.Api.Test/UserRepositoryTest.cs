@@ -274,7 +274,7 @@ namespace JobsOffer.Api.Test
                 _mockGenericRepository.Setup(x => x.GetEntitiesAsync(
                 It.IsAny<Expression<Func<User, bool>>>(),
                 It.IsAny<Func<IQueryable<User>, IOrderedQueryable<User>>>(),
-                "Jobs",
+                null,
                 ",",
                 true,
                 0,
@@ -283,7 +283,7 @@ namespace JobsOffer.Api.Test
                 _mockUnitOfWork.Setup(x => x.GetGenericRepository<User>()).Returns(_mockGenericRepository.Object);
                 _mockGenericGetEntitiesQuery.Setup(x => x.Handle(It.IsAny<Expression<Func<User, bool>>>(),
                 It.IsAny<Func<IQueryable<User>, IOrderedQueryable<User>>>(),
-                "Jobs",
+                null,
                 ",",
                 true,
                 0,
@@ -313,25 +313,26 @@ namespace JobsOffer.Api.Test
                 // Arrange
 #pragma warning disable CS8620 // Impossible d'utiliser l'argument pour le paramètre, car il existe des différences dans l'acceptation des valeurs null par les types référence.
                 _mockGenericRepository.Setup(x => x.GetEntitiesAsync(
-                x => x.Id == 1,
+                It.IsAny<Expression<Func<User, bool>>>(),
                 It.IsAny<Func<IQueryable<User>, IOrderedQueryable<User>>>(),
-                "Jobs",
+                null,
                 ",",
                 true,
                 0,
                 0)).Returns(entityMock);
 #pragma warning restore CS8620 // Impossible d'utiliser l'argument pour le paramètre, car il existe des différences dans l'acceptation des valeurs null par les types référence.
                 _mockUnitOfWork.Setup(x => x.GetGenericRepository<User>()).Returns(_mockGenericRepository.Object);
-                _mockGenericGetEntitiesQuery.Setup(x => x.Handle(x => x.Id == 1,
+                _mockGenericGetEntitiesQuery.Setup(x => x.Handle(
+                It.IsAny<Expression<Func<User, bool>>>(),
                 It.IsAny<Func<IQueryable<User>, IOrderedQueryable<User>>>(),
-                "Jobs",
+                null,
                 ",",
                 true,
                 0,
                 0)).Returns(entityMock);
 
                 // Act
-                var entity = _genericService.GetEntitiesAsync(expression: x => x.Id == 1, includes: "Jobs").SingleOrDefault();
+                var entity = _genericService.GetEntitiesAsync(expression: x => x.Id == 1).SingleOrDefault();
 
                 // Assert
                 var entityMockAsync = entityMock.SingleOrDefault();
@@ -349,15 +350,229 @@ namespace JobsOffer.Api.Test
         #region AUTHENTICATION
 
         #region LOGIN
+        [Fact]
+        public async Task Authentication_ShouldReturnNull_WhenUserIsNull()
+        {
+            try
+            {
+                // Arrange
+                User? entityMock = null;
 
+                // Act
+#pragma warning disable CS8604 // Existence possible d'un argument de référence null.
+                var entity = await _genericService.Authenticate(entityMock);
+#pragma warning restore CS8604 // Existence possible d'un argument de référence null.
+
+                // Assert
+                Assert.Null(entity);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        [Fact]
+        public async Task Authentication_ShouldReturnNull_WhenEmailOrPasswordIsNullOrStringEmpty()
+        {
+            try
+            {
+                // Arrange
+                var entityMock = new User() { Email = string.Empty, Password = null };
+
+                // Act
+                var entity = await _genericService.Authenticate(entityMock);
+
+                // Assert
+                Assert.Null(entity);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        [Fact]
+        public async Task Authentication_ShouldReturnNull_WhenEmailOrPasswordIsIncorrect()
+        {
+            try
+            {
+                // Arrange
+                var entityMockQueryable = new List<User>() { new User() { Email = "user1@test.com", Password = "ba3253876aed6bc22d4a6ff53d8406c6ad864195ed144ab5c87621b6c233b548baeae6956df346ec8c17f5ea10f35ee3cbc514797ed7ddd3145464e2a0bab413" } }.AsQueryable();
+#pragma warning disable CS8620 // Impossible d'utiliser l'argument pour le paramètre, car il existe des différences dans l'acceptation des valeurs null par les types référence.
+                _mockGenericRepository.Setup(x => x.GetEntitiesAsync(
+                It.IsAny<Expression<Func<User, bool>>>(),
+                It.IsAny<Func<IQueryable<User>, IOrderedQueryable<User>>>(),
+                null,
+                ",",
+                true,
+                0,
+                0)).Returns(entityMockQueryable);
+#pragma warning restore CS8620 // Impossible d'utiliser l'argument pour le paramètre, car il existe des différences dans l'acceptation des valeurs null par les types référence.
+                _mockUnitOfWork.Setup(x => x.GetGenericRepository<User>()).Returns(_mockGenericRepository.Object);
+                _mockGenericGetEntitiesQuery.Setup(x => x.Handle(
+                It.IsAny<Expression<Func<User, bool>>>(),
+                It.IsAny<Func<IQueryable<User>, IOrderedQueryable<User>>>(),
+                null,
+                ",",
+                true,
+                0,
+                0)).Returns(entityMockQueryable);
+
+                // Act
+                var entity = await _genericService.Authenticate(new User() { Email = "user1@gmail.com", Password = "123456" });
+
+                // Assert
+                Assert.Null(entity);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        [Fact]
+        public async Task Authentication_ShouldReturnAttenpingUser_WhenEmailOrPasswordIsCorrect()
+        {
+            try
+            {
+                // Arrange
+                var entityMockQueryable = new List<User>() { new User() { Email = "user1@test.com", Password = "ba3253876aed6bc22d4a6ff53d8406c6ad864195ed144ab5c87621b6c233b548baeae6956df346ec8c17f5ea10f35ee3cbc514797ed7ddd3145464e2a0bab413" } }.AsQueryable();
+#pragma warning disable CS8620 // Impossible d'utiliser l'argument pour le paramètre, car il existe des différences dans l'acceptation des valeurs null par les types référence.
+                _mockGenericRepository.Setup(x => x.GetEntitiesAsync(
+                It.IsAny<Expression<Func<User, bool>>>(),
+                It.IsAny<Func<IQueryable<User>, IOrderedQueryable<User>>>(),
+                null,
+                ",",
+                true,
+                0,
+                0)).Returns(entityMockQueryable);
+#pragma warning restore CS8620 // Impossible d'utiliser l'argument pour le paramètre, car il existe des différences dans l'acceptation des valeurs null par les types référence.
+                _mockUnitOfWork.Setup(x => x.GetGenericRepository<User>()).Returns(_mockGenericRepository.Object);
+                _mockGenericGetEntitiesQuery.Setup(x => x.Handle(
+                It.IsAny<Expression<Func<User, bool>>>(),
+                It.IsAny<Func<IQueryable<User>, IOrderedQueryable<User>>>(),
+                null,
+                ",",
+                true,
+                0,
+                0)).Returns(entityMockQueryable);
+
+                // Act
+                var entity = await _genericService.Authenticate(new User() { Email = "user1@test.com", Password = "123456" });
+
+                // Assert
+                Assert.NotNull(entity);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
         #endregion
 
         #region LOGOUT
+        [Fact]
+        public async Task Logout_ShouldReturnFalse_WhenUserIsNull()
+        {
+            try
+            {
+                // Arrange
+                User? entityMock = null;
 
-        #endregion
+                // Act
+#pragma warning disable CS8604 // Existence possible d'un argument de référence null.
+                var entity = await _genericService.Logout(entityMock);
+#pragma warning restore CS8604 // Existence possible d'un argument de référence null.
 
-        #region TOKEN
+                // Assert
+                Assert.False(entity);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
 
+        [Fact]
+        public async Task Logout_ShouldReturnFalse_WhenReturnedUserFromHandleIsNull()
+        {
+            try
+            {
+                // Arrange
+                var entityMockQueryable = new List<User>() { new User() { Email = "user1@test.com", IsOnLine = true, Id = 1 } }.AsQueryable();
+                var entityMockUp = entityMockQueryable.ToList()[0];
+#pragma warning disable CS8620 // Impossible d'utiliser l'argument pour le paramètre, car il existe des différences dans l'acceptation des valeurs null par les types référence.
+                _mockGenericRepository.Setup(x => x.GetEntitiesAsync(
+               x => x.Id == entityMockUp.Id && x.Email == entityMockUp.Email,
+                It.IsAny<Func<IQueryable<User>, IOrderedQueryable<User>>>(),
+                null,
+                ",",
+                true,
+                0,
+                0)).Returns(entityMockQueryable);
+#pragma warning restore CS8620 // Impossible d'utiliser l'argument pour le paramètre, car il existe des différences dans l'acceptation des valeurs null par les types référence.
+                _mockUnitOfWork.Setup(x => x.GetGenericRepository<User>()).Returns(_mockGenericRepository.Object);
+                _mockGenericGetEntitiesQuery.Setup(x => x.Handle(
+               x => x.Id == entityMockUp.Id && x.Email == entityMockUp.Email,
+                It.IsAny<Func<IQueryable<User>, IOrderedQueryable<User>>>(),
+                null,
+                ",",
+                true,
+                0,
+                0)).Returns(entityMockQueryable);
+
+                // Act
+                var isLogout = await _genericService.Logout(new User() { Email = "user1@test.com", IsOnLine = true, Id = 1 });
+
+                // Assert
+                Assert.False(isLogout);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        [Fact]
+        public async Task Logout_ShouldReturnTrue_WhenUserIsFound()
+        {
+            try
+            {
+                // Arrange
+                var entityMockQueryable = new List<User>() { new User() { Email = "user1@test.com", IsOnLine = true, Id = 1 } }.AsQueryable();
+                var entityMockUp = entityMockQueryable.ToList()[0];
+#pragma warning disable CS8620 // Impossible d'utiliser l'argument pour le paramètre, car il existe des différences dans l'acceptation des valeurs null par les types référence.
+                _mockGenericRepository.Setup(x => x.GetEntitiesAsync(
+                It.IsAny<Expression<Func<User, bool>>>(),
+                It.IsAny<Func<IQueryable<User>, IOrderedQueryable<User>>>(),
+                null,
+                ",",
+                true,
+                0,
+                0)).Returns(entityMockQueryable);
+#pragma warning restore CS8620 // Impossible d'utiliser l'argument pour le paramètre, car il existe des différences dans l'acceptation des valeurs null par les types référence.
+                _mockUnitOfWork.Setup(x => x.GetGenericRepository<User>()).Returns(_mockGenericRepository.Object);
+                _mockGenericGetEntitiesQuery.Setup(x => x.Handle(
+                It.IsAny<Expression<Func<User, bool>>>(),
+                It.IsAny<Func<IQueryable<User>, IOrderedQueryable<User>>>(),
+                null,
+                ",",
+                true,
+                0,
+                0)).Returns(entityMockQueryable);
+
+                // Act
+                var isLogout = await _genericService.Logout(new User() { Email = "user1@test.com", IsOnLine = true, Id = 1 });
+
+                // Assert
+                Assert.True(isLogout);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
         #endregion
 
         #endregion
