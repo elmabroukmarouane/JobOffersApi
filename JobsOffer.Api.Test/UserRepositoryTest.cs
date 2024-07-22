@@ -575,6 +575,143 @@ namespace JobsOffer.Api.Test
         }
         #endregion
 
+        #region TOKEN
+        [Fact]
+        public void CreateToken_ShouldReturnToken_WhenUserAndJwtSecurityTokenInformationsIsNotNull()
+        {
+            try
+            {
+                // Arrange
+                //object user, string keyString, string issuerString, string audienceString, int expireTokenDays
+                var user = _entities!.Where(x => x.Id == 1).AsQueryable();
+                var key = "i2miCGkAl88GrN6ZrHf9r813s5RijKk4TUF4wcEOiobdDDS445415i2miCGkAl88GrN6ZrHf9r813s5RijKk4TUF4wcEOiobdDDS445415";
+                var issuerString = "JobOfferAppApi";
+                var audienceString = "public";
+                var expireTokenDays = 2;
+
+                // Act
+#pragma warning disable CS8604 // Existence possible d'un argument de référence null.
+                var token = _genericService.CreateToken(user, key, issuerString, audienceString, expireTokenDays);
+#pragma warning restore CS8604 // Existence possible d'un argument de référence null.
+
+                // Assert
+                Assert.NotNull(token);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        [Fact]
+        public void CreateToken_ShouldReturnNull_WhenUserIsNull()
+        {
+            try
+            {
+                // Arrange
+                //object user, string keyString, string issuerString, string audienceString, int expireTokenDays
+                User? user = null;
+                var key = "i2miCGkAl88GrN6ZrHf9r813s5RijKk4TUF4wcEOiobdDDS445415i2miCGkAl88GrN6ZrHf9r813s5RijKk4TUF4wcEOiobdDDS445415";
+                var issuerString = "JobOfferAppApi";
+                var audienceString = "public";
+                var expireTokenDays = 2;
+
+                // Act
+#pragma warning disable CS8604 // Existence possible d'un argument de référence null.
+                var token = _genericService.CreateToken(user, key, issuerString, audienceString, expireTokenDays);
+#pragma warning restore CS8604 // Existence possible d'un argument de référence null.
+
+                // Assert
+                Assert.Null(token);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        [Fact]
+        public void CreateToken_ShouldReturnNull_WhenKeyIsNull()
+        {
+            try
+            {
+                // Arrange
+                //object user, string keyString, string issuerString, string audienceString, int expireTokenDays
+                var user = _entities!.Where(x => x.Id == 1).AsQueryable();
+                string? key = null;
+                var issuerString = "JobOfferAppApi";
+                var audienceString = "public";
+                var expireTokenDays = 2;
+
+                // Act
+#pragma warning disable CS8604 // Existence possible d'un argument de référence null.
+                var token = _genericService.CreateToken(user, key, issuerString, audienceString, expireTokenDays);
+#pragma warning restore CS8604 // Existence possible d'un argument de référence null.
+
+                // Assert
+                Assert.Null(token);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        [Fact]
+        public void CreateToken_ShouldReturnNull_WhenIssuerIsNull()
+        {
+            try
+            {
+                // Arrange
+                //object user, string keyString, string issuerString, string audienceString, int expireTokenDays
+                var user = _entities!.Where(x => x.Id == 1).AsQueryable();
+                var key = "i2miCGkAl88GrN6ZrHf9r813s5RijKk4TUF4wcEOiobdDDS445415i2miCGkAl88GrN6ZrHf9r813s5RijKk4TUF4wcEOiobdDDS445415";
+                string? issuerString = null;
+                var audienceString = "public";
+                var expireTokenDays = 2;
+
+                // Act
+#pragma warning disable CS8604 // Existence possible d'un argument de référence null.
+                var token = _genericService.CreateToken(user, key, issuerString, audienceString, expireTokenDays);
+#pragma warning restore CS8604 // Existence possible d'un argument de référence null.
+
+                // Assert
+                Assert.Null(token);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        [Fact]
+        public void CreateToken_ShouldReturnNull_WhenAudienceIsNull()
+        {
+            try
+            {
+                // Arrange
+                //object user, string keyString, string issuerString, string audienceString, int expireTokenDays
+                var user = _entities!.Where(x => x.Id == 1).AsQueryable();
+                var key = "i2miCGkAl88GrN6ZrHf9r813s5RijKk4TUF4wcEOiobdDDS445415i2miCGkAl88GrN6ZrHf9r813s5RijKk4TUF4wcEOiobdDDS445415";
+                var issuerString = "JobOfferAppApi";
+                string? audienceString = null;
+                var expireTokenDays = 2;
+
+                // Act
+#pragma warning disable CS8604 // Existence possible d'un argument de référence null.
+                var token = _genericService.CreateToken(user, key, issuerString, audienceString, expireTokenDays);
+#pragma warning restore CS8604 // Existence possible d'un argument de référence null.
+
+                // Assert
+                Assert.Null(token);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+        #endregion
+
         #endregion
     }
 }

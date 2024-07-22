@@ -113,21 +113,25 @@ namespace JobsOffer.Api.Business.Services.Classes
         #endregion
 
         #region TOKEN
-        public string CreateToken(object user, string keyString, string issuerString, string audienceString, int expireTokenDays)
+        public string? CreateToken(object user, string keyString, string issuerString, string audienceString, int expireTokenDays = 1)
         {
-            var claims = new[] {
+            if (user != null && keyString != null && issuerString != null && audienceString != null)
+            {
+                var claims = new[] {
                 new Claim("user", JsonSerializer.Serialize(user))
             };
-            var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(keyString));
-            var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-            var token = new JwtSecurityToken(
-                issuer: issuerString,
-                audience: audienceString,
-                claims: claims,
-                expires: DateTime.Now.AddDays(expireTokenDays),
-                signingCredentials: signingCredentials);
-            return new JwtSecurityTokenHandler().WriteToken(token);
+                var key = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(keyString));
+                var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+                var token = new JwtSecurityToken(
+                    issuer: issuerString,
+                    audience: audienceString,
+                    claims: claims,
+                    expires: DateTime.Now.AddDays(expireTokenDays),
+                    signingCredentials: signingCredentials);
+                return new JwtSecurityTokenHandler().WriteToken(token);
+            }
+            return null;
         }
         #endregion
     }
