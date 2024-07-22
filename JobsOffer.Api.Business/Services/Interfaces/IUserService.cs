@@ -38,7 +38,7 @@ namespace JobsOffer.Api.Business.Services.Interfaces
         #endregion
 
         #region TOKEN
-        string? CreateToken(object user, string keyString, string issuerString, string audienceString, int expireTokenDays);
+        string? CreateToken(object user, string keyString, string issuerString, string audienceString, int expireTokenDays = 1);
         #endregion
     }
 }
