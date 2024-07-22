@@ -93,10 +93,9 @@ public static class AddConnexion
         {
             if (env.IsDevelopment())
             {
-                var cnx = configuration.GetConnectionString(connectionString);
                 options.UseSqlite(
                     configuration.GetConnectionString(connectionString)
-                   ).EnableSensitiveDataLogging().EnableDetailedErrors(); ;
+                   ).EnableSensitiveDataLogging().EnableDetailedErrors();
             }
             else
             {
