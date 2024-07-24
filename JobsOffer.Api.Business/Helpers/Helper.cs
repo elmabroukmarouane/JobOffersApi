@@ -1,5 +1,6 @@
 ﻿using JobsOffer.Api.Infrastructure.DatabaseContext.Seed.FakeData;
 using JobsOffer.Api.Infrastructure.Models.Classes;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using System.Reflection;
@@ -38,23 +39,54 @@ namespace JobsOffer.Api.Business.Helpers
             return users;
         }
 
-        public static List<Type> GetAttributeTypes(Type parentType)
+        public static List<AttributeType> GetAttributeTypes(Type parentType)
         {
-            var attributeTypes = new HashSet<Type>();
+            var attributeTypes = new HashSet<AttributeType>();
             var properties = parentType.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
             foreach (var property in properties)
             {
-                if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(ICollection<>))
+                var typeProperty = property.PropertyType;
+                if (typeProperty.IsGenericType && typeProperty.GetGenericTypeDefinition() == typeof(ICollection<>))
                 {
-                    var elementType = property.PropertyType.GetGenericArguments()[0];
-                    attributeTypes.Add(elementType);
+                    var elementType = typeProperty.GetGenericArguments()[0];
+                    attributeTypes.Add(new AttributeType()
+                    {
+                        PropertyType = elementType,
+                        TypeClass = TypeClass.Collection
+                    });
+                }
+                else if (typeof(Entity).IsAssignableFrom(typeProperty))
+                {
+                    attributeTypes.Add(new AttributeType()
+                    {
+                        PropertyType = typeProperty,
+                        TypeClass = TypeClass.Class
+                    });
                 }
                 else
                 {
-                    attributeTypes.Add(property.PropertyType);
+                    attributeTypes.Add(new AttributeType()
+                    {
+                        PropertyType = typeProperty,
+                        TypeClass = TypeClass.Other
+                    });
                 }
             }
             return attributeTypes.ToList();
         }
+
+    }
+
+    public class AttributeType
+    {
+        public required Type PropertyType { get; set; }
+        public required TypeClass TypeClass { get; set; }
+    }
+
+    public enum TypeClass
+    {
+        Collection,
+        Class,
+        Other
     }
 }
