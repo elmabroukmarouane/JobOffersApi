@@ -52,7 +52,7 @@ namespace JobsOffer.Api.Business.Cqrs.Queries.Classes
                 {
                     if (_cache.TryGetValue(CacheKey!, out IList<TEntity>? cachedListData))
                     {
-                        return GetEntities(cachedListData, expression, orberBy, includes, splitChar, disableTracking, take, offset);
+                        return GetEntities(cachedListData, expression, orberBy, includes ?? GetIncludes(), splitChar, disableTracking, take, offset);
                     }
 
                     if (_distributedCache is not null)
@@ -62,40 +62,36 @@ namespace JobsOffer.Api.Business.Cqrs.Queries.Classes
                         {
                             var cachedDistributedListData = JsonSerializer.Deserialize<IList<TEntity>>(serializedData);
                             _cache.Set(CacheKey!, cachedDistributedListData);
-                            return GetEntities(cachedDistributedListData, expression, orberBy, includes, splitChar, disableTracking, take, offset);
+                            return GetEntities(cachedDistributedListData, expression, orberBy, includes ?? GetIncludes(), splitChar, disableTracking, take, offset);
                         }
                     }
 
                     if(!_cache.TryGetValue(CacheKey!, out IList<TEntity>? cachedLocalListData))
                     {
-                        var typesList = Helper.GetAttributeTypes(typeof(TEntity)).Where(x => x.BaseType == typeof(Entity)).ToList();
-                        var includesList = new List<string>();
-                        typesList.ForEach(x => {  includesList.Add($"{x.Name}s"); });
-                        var includesString = string.Join(',', includesList.ToArray());
+                        var includesString = GetIncludes();
                         var cachedSettedListData = _unitOfWork.GetGenericRepository<TEntity>().GetEntitiesAsync(expression: null, orberBy: null, includesString, splitChar, disableTracking, take: 0, offset: 0).ToList();
                         _cache.Set(CacheKey!, cachedSettedListData);
-                        return GetEntities(cachedSettedListData, expression, orberBy, includes, splitChar, disableTracking, take, offset);
+                        return GetEntities(cachedSettedListData, expression, orberBy, includes ?? includesString, splitChar, disableTracking, take, offset);
                     }
                 }
             }
-            return _unitOfWork.GetGenericRepository<TEntity>().GetEntitiesAsync(expression, orberBy, includes, splitChar, disableTracking, take, offset);
+            return _unitOfWork.GetGenericRepository<TEntity>().GetEntitiesAsync(expression, orberBy, includes ?? GetIncludes(), splitChar, disableTracking, take, offset);
         }
 
         public async Task<TEntity?> Handle(TEntity entity) => await _unitOfWork.GetGenericRepository<TEntity>().GetEntitiesAsync(entity);
 
-        public async Task<IQueryable<TEntity?>> CacheDataBase(
-            Expression<Func<TEntity, bool>>? expression = null,
-            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orberBy = null,
-            string? includes = null,
-            string splitChar = ",",
-            bool disableTracking = true,
-
-            int take = 0,
-            int offset = 0)
+        public IQueryable<TEntity?> Handle()
         {
-            var cachedListData = await _unitOfWork.GetGenericRepository<TEntity>().GetEntitiesAsync(expression, orberBy, includes, splitChar, disableTracking, take, offset).ToListAsync();
-            _cache!.Set(CacheKey!, cachedListData);
-            return await Task.FromResult(GetEntities(cachedListData, expression, orberBy, includes, splitChar, disableTracking, take, offset));
+#pragma warning disable CS8604 // Existence possible d'un argument de référence null.
+            if (!_cache.TryGetValue(CacheKey!, out IList<TEntity>? cachedLocalListData))
+            {
+                var includesString = GetIncludes();
+                var cachedListData = _unitOfWork.GetGenericRepository<TEntity>().GetEntitiesAsync(expression: null, orberBy: null, includesString, splitChar: ",", disableTracking: true, take: 0, offset: 0).ToList();
+                _cache!.Set(CacheKey!, cachedListData);
+                return GetEntities(cachedListData, expression: null, orberBy: null, includesString, splitChar: ",", disableTracking: true, take: 0, offset: 0);
+            }
+            return cachedLocalListData.AsQueryable();
+#pragma warning restore CS8604 // Existence possible d'un argument de référence null.
         }
         #endregion
 
@@ -149,6 +145,14 @@ namespace JobsOffer.Api.Business.Cqrs.Queries.Classes
                 }
             }
             return cachedFilterData ?? new List<TEntity>().AsQueryable();
+        }
+
+        private string GetIncludes()
+        {
+            var typesList = Helper.GetAttributeTypes(typeof(TEntity)).Where(x => x.BaseType == typeof(Entity)).ToList();
+            var includesList = new List<string>();
+            typesList.ForEach(x => { includesList.Add($"{x.Name}s"); });
+            return string.Join(',', includesList.ToArray());
         }
         #endregion
     }

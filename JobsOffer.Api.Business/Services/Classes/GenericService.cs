@@ -58,6 +58,10 @@ namespace JobsOffer.Api.Business.Services.Classes
         {
             return _genericGetEntitiesQuery.Handle(expression, orberBy, includes, splitChar, disableTracking, take, offset, inDatabase);
         }
+        public IQueryable<TEntity?> GetEntitiesAsync()
+        {
+            return _genericGetEntitiesQuery.Handle();
+        }
 
         public async Task<TEntity?> GetEntitiesAsync(TEntity entity)
         {

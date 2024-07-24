@@ -6,6 +6,7 @@ namespace JobsOffer.Api.Business.Services.Interfaces
     public interface IGenericService<TEntity> where TEntity : Entity
     {
         #region READ
+        IQueryable<TEntity?> GetEntitiesAsync();
         IQueryable<TEntity> GetEntitiesAsync(
             Expression<Func<TEntity, bool>>? expression = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orberBy = null,
