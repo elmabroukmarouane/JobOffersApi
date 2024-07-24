@@ -165,7 +165,7 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
                         Message = "Added Row is null !"
                     });
                 }
-                HelperCache.AddCache(row, row.GetType().Name, _cache);
+                HelperCache<User>.AddCache(row, _cache);
                 var mapperRow = _mapper.Map<UserViewModel>(row);
                 await _realTimeHub.Clients.All.SendAsync("Row Created !", mapperRow);
                 return Ok(mapperRow);
@@ -205,7 +205,7 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
                         Message = "Added Rows is null !"
                     });
                 }
-                HelperCache.AddCache(rows, rows.GetType().Name, _cache);
+                HelperCache<User>.AddCache(rows, _cache);
                 var mapperRows = _mapper.Map<IList<UserViewModel>>(rows);
                 await _realTimeHub.Clients.All.SendAsync("Rows Created !", mapperRows);
                 return Ok(mapperRows);
@@ -236,12 +236,12 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
                         Message = "Entity received is null !"
                     });
                 }
-                HelperCache.DeleteCache(entity, entity.GetType().Name, _cache);
                 var reverseMapEntity = _mapper.Map<User>(entity);
+                HelperCache<User>.DeleteCache(reverseMapEntity, _cache);
                 var row = await _userService.UpdateAsync(reverseMapEntity);
                 if (row == null)
                 {
-                    HelperCache.AddCache(entity, entity.GetType().Name, _cache);
+                    HelperCache<User>.AddCache(reverseMapEntity, _cache);
                     _logger.LoggingMessageWarning("JobOffer.API", (int)HttpStatusCode.InternalServerError, "ROW IS NULL !", HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "", " - Put(UserViewModel entity, int id)", _hostEnvironment.ContentRootPath);
                     return StatusCode(500,
                     new
@@ -249,7 +249,7 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
                         Message = "Updated Row is null !"
                     });
                 }
-                HelperCache.AddCache(row, row.GetType().Name, _cache);
+                HelperCache<User>.AddCache(row, _cache);
                 var mapperRow = _mapper.Map<UserViewModel>(row);
                 await _realTimeHub.Clients.All.SendAsync("Row Updated !", mapperRow);
                 return Ok(mapperRow);
@@ -278,12 +278,12 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
                         Message = "Entity received is null !"
                     });
                 }
-                HelperCache.DeleteCache(entities, entities.GetType().Name, _cache);
                 var reverseMapEntities = _mapper.Map<IList<User>>(entities);
+                HelperCache<User>.DeleteCache(reverseMapEntities, _cache);
                 var rows = await _userService.UpdateAsync(reverseMapEntities);
                 if (rows == null)
                 {
-                    HelperCache.AddCache(entities, entities.GetType().Name, _cache);
+                    HelperCache<User>.AddCache(reverseMapEntities, _cache);
                     _logger.LoggingMessageWarning("JobOffer.API", (int)HttpStatusCode.InternalServerError, "ROWS IS NULL !", HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "", " - Put(IList<UserViewModel> entities)", _hostEnvironment.ContentRootPath);
                     return StatusCode(500,
                     new
@@ -291,7 +291,7 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
                         Message = "Updated Rows is null !"
                     });
                 }
-                HelperCache.AddCache(rows, rows.GetType().Name, _cache);
+                HelperCache<User>.AddCache(rows, _cache);
                 var mapperRows = _mapper.Map<IList<UserViewModel>>(rows);
                 await _realTimeHub.Clients.All.SendAsync("Rows Updated !", mapperRows);
                 return Ok(mapperRows);
@@ -333,7 +333,7 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
                         Message = "Deleted Row is null !"
                     });
                 }
-                HelperCache.DeleteCache(row, row.GetType().Name, _cache);
+                HelperCache<User>.DeleteCache(row, _cache);
                 var mapperRow = _mapper.Map<UserViewModel>(row);
                 await _realTimeHub.Clients.All.SendAsync("Row Deleted !", mapperRow);
                 return Ok(mapperRow);
@@ -373,7 +373,7 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
                         Message = "Deleted Rows is null !"
                     });
                 }
-                HelperCache.DeleteCache(rows, rows.GetType().Name, _cache);
+                HelperCache<User>.DeleteCache(rows, _cache);
                 var mapperRows = _mapper.Map<IList<UserViewModel>>(rows);
                 await _realTimeHub.Clients.All.SendAsync("Rows Deleted !", mapperRows);
                 return Ok(mapperRows);
