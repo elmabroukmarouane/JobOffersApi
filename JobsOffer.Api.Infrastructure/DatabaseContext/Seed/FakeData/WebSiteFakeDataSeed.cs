@@ -11,7 +11,7 @@ namespace JobsOffer.Api.Infrastructure.DatabaseContext.Seed.FakeData
             return new Faker<WebSite>("fr")
                 .RuleFor(x => x.Id, f => id++)
                 .RuleFor(x => x.SiteName, f => f.Company.CompanyName())
-                .RuleFor(x => x.SiteUrl, f => f.Internet.Url())
+                .RuleFor(x => x.SiteUrl, f => f.Lorem.Word())
                 .RuleFor(x => x.CreateDate, f => f.Date.Past())
                 .RuleFor(x => x.CreatedBy, f => f.Person.FullName)
                 .RuleFor(x => x.UpdateDate, f => f.Date.Past())

@@ -15,7 +15,7 @@ namespace JobsOffer.Api.Infrastructure.DatabaseContext.Seed.FakeData
                 .RuleFor(x => x.Title, f => f.Name.JobTitle())
                 .RuleFor(x => x.Description, f => f.Name.JobDescriptor())
                 .RuleFor(x => x.Link, f => f.Internet.Url())
-                .RuleFor(x => x.Image, f => f.Image.PicsumUrl())
+                .RuleFor(x => x.Image, f => f.Lorem.Word())
                 .RuleFor(x => x.CreateDate, f => f.Date.Past())
                 .RuleFor(x => x.CreatedBy, f => f.Person.FullName)
                 .RuleFor(x => x.UpdateDate, f => f.Date.Past())
