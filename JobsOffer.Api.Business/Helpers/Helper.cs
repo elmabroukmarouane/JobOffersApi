@@ -1,5 +1,8 @@
 ﻿using JobsOffer.Api.Infrastructure.DatabaseContext.Seed.FakeData;
 using JobsOffer.Api.Infrastructure.Models.Classes;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
+using System.Reflection;
 
 namespace JobsOffer.Api.Business.Helpers
 {
@@ -33,6 +36,30 @@ namespace JobsOffer.Api.Business.Helpers
                 user.Password = UserFakeDataSeed.CreateHashPassword(user.Password);
             }
             return users;
+        }
+
+        public static List<Type> GetAttributeTypes(Type parentType)
+        {
+            var attributeTypes = new HashSet<Type>();
+
+            // Get all properties and their types
+            var properties = parentType.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            foreach (var property in properties)
+            {
+                // Check if the property is a collection
+                if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(ICollection<>))
+                {
+                    // Get the type of the elements in the collection
+                    var elementType = property.PropertyType.GetGenericArguments()[0];
+                    attributeTypes.Add(elementType);
+                }
+                else
+                {
+                    attributeTypes.Add(property.PropertyType);
+                }
+            }
+
+            return attributeTypes.ToList();
         }
     }
 }

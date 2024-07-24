@@ -37,9 +37,9 @@ namespace JobsOffer.Api.Business.Services.Classes
         #endregion
 
         #region READ
-        public IQueryable<User> GetEntitiesAsync(Expression<Func<User, bool>>? expression = null, Func<IQueryable<User>, IOrderedQueryable<User>>? orberBy = null, string? includes = null, string splitChar = ",", bool disableTracking = true, int take = 0, int offset = 0)
+        public IQueryable<User> GetEntitiesAsync(Expression<Func<User, bool>>? expression = null, Func<IQueryable<User>, IOrderedQueryable<User>>? orberBy = null, string? includes = null, string splitChar = ",", bool disableTracking = true, int take = 0, int offset = 0, bool inDatabase = false)
         {
-            return _genericGetEntitiesQuery.Handle(expression, orberBy, includes, splitChar, disableTracking, take, offset);
+            return _genericGetEntitiesQuery.Handle(expression, orberBy, includes, splitChar, disableTracking, take, offset, inDatabase);
         }
 
         public async Task<User?> GetEntitiesAsync(User entity)
@@ -85,11 +85,11 @@ namespace JobsOffer.Api.Business.Services.Classes
         #endregion
 
         #region AUTHENTICATION
-        public async Task<User?> Authenticate(User user)
+        public async Task<User?> Authenticate(User user, bool inDatabase = false)
         {
             if (user is null) return null;
             if (string.IsNullOrEmpty(user.Email) || string.IsNullOrEmpty(user.Password)) return null;
-            var attempingUser = _genericGetEntitiesQuery.Handle(expression : x => x.Email!.ToLower().Trim() == user.Email).SingleOrDefault();
+            var attempingUser = _genericGetEntitiesQuery.Handle(expression : x => x.Email!.ToLower().Trim() == user.Email, inDatabase: inDatabase).SingleOrDefault();
             if (attempingUser is null) return null;
             user = Helper.EncryptPassword(user);
             if (attempingUser.Email == user.Email && attempingUser.Password == user.Password)
@@ -101,10 +101,10 @@ namespace JobsOffer.Api.Business.Services.Classes
             return null;
         }
 
-        public async Task<bool> Logout(User user)
+        public async Task<bool> Logout(User user, bool inDatabase = false)
         {
             if(user is null) return false;
-            var loggedUser = _genericGetEntitiesQuery.Handle(expression: x => x.Id == user.Id && x.Email == user.Email).SingleOrDefault();
+            var loggedUser = _genericGetEntitiesQuery.Handle(expression: x => x.Id == user.Id && x.Email == user.Email, inDatabase: inDatabase).SingleOrDefault();
             if (loggedUser is null) return false;
             loggedUser.IsOnLine = false;
             await _userUpdateCommand.Handle(loggedUser, true);

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using JobsOffer.Api.Business.Helpers;
 using JobsOffer.Api.Business.Helpers.LambdaManagement.Helper;
+using JobsOffer.Api.Business.Helpers.LambdaManagement.Models;
 using JobsOffer.Api.Business.Services.Interfaces;
 using JobsOffer.Api.Infrastructure.Models.Classes;
 using JobsOffer.Api.Server.Extensions.Logging;
@@ -8,7 +9,7 @@ using JobsOffer.Api.Server.RealTime.Class;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System.Net;
 
 namespace JobsOffer.Api.Server.GenericController
@@ -26,6 +27,7 @@ namespace JobsOffer.Api.Server.GenericController
         protected readonly ILogger<GenericController<TEntity, TEntityViewModel>> _logger;
         protected readonly IHostEnvironment _hostEnvironment;
         protected readonly IHubContext<RealTimeHub> _realTimeHub;
+        protected readonly IMemoryCache _cache;
         #endregion
 
         #region CONSTRUCTOR
@@ -34,23 +36,25 @@ namespace JobsOffer.Api.Server.GenericController
             IMapper mapper,
             ILogger<GenericController<TEntity, TEntityViewModel>> logger,
             IHostEnvironment hostEnvironment,
-            IHubContext<RealTimeHub> hubContext)
+            IHubContext<RealTimeHub> hubContext,
+            IMemoryCache cache)
         {
             _genericService = genericService ?? throw new ArgumentException(null, nameof(genericService));
             _mapper = mapper ?? throw new ArgumentNullException(null, nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(null, nameof(logger));
             _hostEnvironment = hostEnvironment ?? throw new ArgumentNullException(null,nameof(hostEnvironment));
             _realTimeHub = hubContext ?? throw new ArgumentNullException(null, nameof(hubContext));
+            _cache = cache ?? throw new ArgumentNullException(null, nameof(cache));
         }
         #endregion
 
         #region READ
         [HttpGet]
-        public virtual async Task<IActionResult> Get(string? includes = null)
+        public IActionResult Get(string? includes = null)
         {
             try
             {
-                var list = await _genericService.GetEntitiesAsync(includes : includes).ToListAsync();
+                var list = _genericService.GetEntitiesAsync(includes : includes).ToList();
                 if(list == null)
                 {
                     _logger.LoggingMessageWarning("JobOffer.API", (int)HttpStatusCode.NotFound, HttpStatusCode.NotFound.ToString(), HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "", " - Get()", _hostEnvironment.ContentRootPath);
@@ -74,11 +78,11 @@ namespace JobsOffer.Api.Server.GenericController
         }
 
         [HttpGet("{id:int}")]
-        public virtual async Task<IActionResult> Get(int id, string? includes = null)
+        public virtual IActionResult Get(int id, string? includes = null)
         {
             try
             {
-                var row = await _genericService.GetEntitiesAsync(expression : x => x.Id == id, includes : includes).SingleOrDefaultAsync();
+                var row = _genericService.GetEntitiesAsync(expression : x => x.Id == id, includes : includes).SingleOrDefault();
                 if (row == null)
                 {
                     _logger.LoggingMessageWarning("JobOffer.API", (int)HttpStatusCode.NotFound, HttpStatusCode.NotFound.ToString(), HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "", " - Get(int id)", _hostEnvironment.ContentRootPath);
@@ -103,12 +107,12 @@ namespace JobsOffer.Api.Server.GenericController
 
         // TODO : Make the same for orderBy like LambdaExpressionModel
         [HttpPost("filter")]
-        public virtual async Task<IActionResult> Get(FilterDataModel filterDataModel)
+        public virtual IActionResult Get(FilterDataModel filterDataModel)
         {
             try
             {
                 var lambdaExpression = ExpressionBuilder.BuildLambda<TEntity>(filterDataModel.LambdaExpressionModel);
-                var filteredRows = await _genericService.GetEntitiesAsync(lambdaExpression, includes : filterDataModel.Includes, splitChar : filterDataModel.SplitChar, disableTracking : filterDataModel.DisableTracking, take : filterDataModel.Take, offset : filterDataModel.Offset).ToListAsync();
+                var filteredRows = _genericService.GetEntitiesAsync(lambdaExpression, includes : filterDataModel.Includes, splitChar : filterDataModel.SplitChar, disableTracking : filterDataModel.DisableTracking, take : filterDataModel.Take, offset : filterDataModel.Offset).ToList();
                 if (filteredRows == null)
                 {
                     _logger.LoggingMessageWarning("JobOffer.API", (int)HttpStatusCode.NotFound, HttpStatusCode.NotFound.ToString(), HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "", " - Post(filter)", _hostEnvironment.ContentRootPath);
@@ -159,6 +163,7 @@ namespace JobsOffer.Api.Server.GenericController
                         Message = "Added Row is null !"
                     });
                 }
+                HelperCache.AddCache(row, row.GetType().Name, _cache);
                 var mapperRow = _mapper.Map<TEntityViewModel>(row);
                 await _realTimeHub.Clients.All.SendAsync("Row Created !", mapperRow);
                 return Ok(mapperRow);
@@ -202,6 +207,7 @@ namespace JobsOffer.Api.Server.GenericController
                         Message = "Added Rows is null !"
                     });
                 }
+                HelperCache.AddCache(rows, rows.GetType().Name, _cache);
                 var mapperRows = _mapper.Map<IList<TEntityViewModel>>(rows);
                 await _realTimeHub.Clients.All.SendAsync("Rows Created !", mapperRows);
                 return Ok(mapperRows);
@@ -233,10 +239,12 @@ namespace JobsOffer.Api.Server.GenericController
                     });
                 }
                 var reverseMapEntity = _mapper.Map<TEntity>(entity);
+                HelperCache.DeleteCache(reverseMapEntity, reverseMapEntity.GetType().Name, _cache);
                 reverseMapEntity.UpdateDate = DateTime.Now;
                 var row = await _genericService.UpdateAsync(reverseMapEntity);
                 if (row == null)
                 {
+                    HelperCache.AddCache(reverseMapEntity, reverseMapEntity.GetType().Name, _cache);
                     _logger.LoggingMessageWarning("JobOffer.API", (int)HttpStatusCode.InternalServerError, "ROW IS NULL !", HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "", " - Put(TEntityViewModel entity, int id)", _hostEnvironment.ContentRootPath);
                     return StatusCode(500,
                     new
@@ -244,6 +252,7 @@ namespace JobsOffer.Api.Server.GenericController
                         Message = "Updated Row is null !"
                     });
                 }
+                HelperCache.AddCache(row, row.GetType().Name, _cache);
                 var mapperRow = _mapper.Map<TEntityViewModel>(row);
                 await _realTimeHub.Clients.All.SendAsync("Row Updated !", mapperRow);
                 return Ok(mapperRow);
@@ -273,6 +282,7 @@ namespace JobsOffer.Api.Server.GenericController
                     });
                 }
                 var reverseMapEntities = _mapper.Map<IList<TEntity>>(entities);
+                HelperCache.DeleteCache(reverseMapEntities, reverseMapEntities.GetType().Name, _cache);
                 foreach (var reverseMapEntity in reverseMapEntities)
                 {
                     reverseMapEntity.UpdateDate = DateTime.Now;
@@ -280,6 +290,7 @@ namespace JobsOffer.Api.Server.GenericController
                 var rows = await _genericService.UpdateAsync(reverseMapEntities);
                 if (rows == null)
                 {
+                    HelperCache.AddCache(reverseMapEntities, reverseMapEntities.GetType().Name, _cache);
                     _logger.LoggingMessageWarning("JobOffer.API", (int)HttpStatusCode.InternalServerError, "ROWS IS NULL !", HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "", " - Put(IList<TEntityViewModel> entities)", _hostEnvironment.ContentRootPath);
                     return StatusCode(500,
                     new
@@ -287,6 +298,7 @@ namespace JobsOffer.Api.Server.GenericController
                         Message = "Updated Rows is null !"
                     });
                 }
+                HelperCache.AddCache(rows, rows.GetType().Name, _cache);
                 var mapperRows = _mapper.Map<IList<TEntityViewModel>>(rows);
                 await _realTimeHub.Clients.All.SendAsync("Rows Updated !", mapperRows);
                 return Ok(mapperRows);
@@ -328,6 +340,7 @@ namespace JobsOffer.Api.Server.GenericController
                         Message = "Deleted Row is null !"
                     });
                 }
+                HelperCache.DeleteCache(row, row.GetType().Name, _cache);
                 var mapperRow = _mapper.Map<TEntityViewModel>(row);
                 await _realTimeHub.Clients.All.SendAsync("Row Deleted !", mapperRow);
                 return Ok(mapperRow);
@@ -367,6 +380,7 @@ namespace JobsOffer.Api.Server.GenericController
                         Message = "Deleted Rows is null !"
                     });
                 }
+                HelperCache.DeleteCache(rows, rows.GetType().Name, _cache);
                 var mapperRows = _mapper.Map<IList<TEntityViewModel>>(rows);
                 await _realTimeHub.Clients.All.SendAsync("Rows Deleted !", mapperRows);
                 return Ok(mapperRows);

@@ -11,6 +11,8 @@ using JobsOffer.Api.Business.Cqrs.Queries.Classes;
 using Bogus;
 using JobsOffer.Api.Infrastructure.DatabaseContext.Seed.FakeData;
 using System.Linq.Expressions;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace JobsOffer.Api.Test
 {
@@ -268,10 +270,11 @@ namespace JobsOffer.Api.Test
                 ",",
                 true,
                 0,
-                0)).Returns(entitiesMock);
+                0,
+                true)).Returns(entitiesMock);
 
                 // Act
-                var entities = (IList<Profil>)_genericService.GetEntitiesAsync(includes: "Jobs").ToList();
+                var entities = (IList<Profil>)_genericService.GetEntitiesAsync(includes: "Jobs", inDatabase: true).ToList();
 
                 // Assert
                 var entitiesMockAsync = (IList<Profil>)entitiesMock.ToList();
@@ -309,10 +312,11 @@ namespace JobsOffer.Api.Test
                 ",",
                 true,
                 0,
-                0)).Returns(entityMock);
+                0,
+                true)).Returns(entityMock);
 
                 // Act
-                var entity = _genericService.GetEntitiesAsync(expression: x => x.Id == 1, includes: "Jobs").SingleOrDefault();
+                var entity = _genericService.GetEntitiesAsync(expression: x => x.Id == 1, includes: "Jobs", inDatabase: true).SingleOrDefault();
 
                 // Assert
                 var entityMockAsync = entityMock.SingleOrDefault();

@@ -29,7 +29,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JobsOffer.Api.Server.WebSit
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JobsOffer.Api.Server.ApiGateway", "JobsOffer.Api.Server.ApiGateway\JobsOffer.Api.Server.ApiGateway.csproj", "{14415C79-F857-4653-AA0C-A3B30CC91B4A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobsOffer.Api.Test", "JobsOffer.Api.Test\JobsOffer.Api.Test.csproj", "{E899AFB3-3AC3-431A-9586-2CCE1AF29A74}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JobsOffer.Api.Test", "JobsOffer.Api.Test\JobsOffer.Api.Test.csproj", "{E899AFB3-3AC3-431A-9586-2CCE1AF29A74}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E35F9F04-1DDB-4D57-BF9F-80CC481E397F}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
