@@ -41,15 +41,11 @@ namespace JobsOffer.Api.Business.Helpers
         public static List<Type> GetAttributeTypes(Type parentType)
         {
             var attributeTypes = new HashSet<Type>();
-
-            // Get all properties and their types
             var properties = parentType.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
             foreach (var property in properties)
             {
-                // Check if the property is a collection
                 if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(ICollection<>))
                 {
-                    // Get the type of the elements in the collection
                     var elementType = property.PropertyType.GetGenericArguments()[0];
                     attributeTypes.Add(elementType);
                 }
@@ -58,7 +54,6 @@ namespace JobsOffer.Api.Business.Helpers
                     attributeTypes.Add(property.PropertyType);
                 }
             }
-
             return attributeTypes.ToList();
         }
     }

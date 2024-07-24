@@ -163,7 +163,7 @@ namespace JobsOffer.Api.Server.GenericController
                         Message = "Added Row is null !"
                     });
                 }
-                HelperCache.AddCache(row, row.GetType().Name, _cache);
+                HelperCache<TEntity>.AddCache(row, _cache);
                 var mapperRow = _mapper.Map<TEntityViewModel>(row);
                 await _realTimeHub.Clients.All.SendAsync("Row Created !", mapperRow);
                 return Ok(mapperRow);
@@ -207,7 +207,7 @@ namespace JobsOffer.Api.Server.GenericController
                         Message = "Added Rows is null !"
                     });
                 }
-                HelperCache.AddCache(rows, rows.GetType().Name, _cache);
+                HelperCache<TEntity>.AddCache(rows, _cache);
                 var mapperRows = _mapper.Map<IList<TEntityViewModel>>(rows);
                 await _realTimeHub.Clients.All.SendAsync("Rows Created !", mapperRows);
                 return Ok(mapperRows);
@@ -239,12 +239,12 @@ namespace JobsOffer.Api.Server.GenericController
                     });
                 }
                 var reverseMapEntity = _mapper.Map<TEntity>(entity);
-                HelperCache.DeleteCache(reverseMapEntity, reverseMapEntity.GetType().Name, _cache);
+                HelperCache<TEntity>.DeleteCache(reverseMapEntity, _cache);
                 reverseMapEntity.UpdateDate = DateTime.Now;
                 var row = await _genericService.UpdateAsync(reverseMapEntity);
                 if (row == null)
                 {
-                    HelperCache.AddCache(reverseMapEntity, reverseMapEntity.GetType().Name, _cache);
+                    HelperCache<TEntity>.AddCache(reverseMapEntity, _cache);
                     _logger.LoggingMessageWarning("JobOffer.API", (int)HttpStatusCode.InternalServerError, "ROW IS NULL !", HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "", " - Put(TEntityViewModel entity, int id)", _hostEnvironment.ContentRootPath);
                     return StatusCode(500,
                     new
@@ -252,7 +252,7 @@ namespace JobsOffer.Api.Server.GenericController
                         Message = "Updated Row is null !"
                     });
                 }
-                HelperCache.AddCache(row, row.GetType().Name, _cache);
+                HelperCache<TEntity>.AddCache(row, _cache);
                 var mapperRow = _mapper.Map<TEntityViewModel>(row);
                 await _realTimeHub.Clients.All.SendAsync("Row Updated !", mapperRow);
                 return Ok(mapperRow);
@@ -282,7 +282,7 @@ namespace JobsOffer.Api.Server.GenericController
                     });
                 }
                 var reverseMapEntities = _mapper.Map<IList<TEntity>>(entities);
-                HelperCache.DeleteCache(reverseMapEntities, reverseMapEntities.GetType().Name, _cache);
+                HelperCache<TEntity>.DeleteCache(reverseMapEntities, _cache);
                 foreach (var reverseMapEntity in reverseMapEntities)
                 {
                     reverseMapEntity.UpdateDate = DateTime.Now;
@@ -290,7 +290,7 @@ namespace JobsOffer.Api.Server.GenericController
                 var rows = await _genericService.UpdateAsync(reverseMapEntities);
                 if (rows == null)
                 {
-                    HelperCache.AddCache(reverseMapEntities, reverseMapEntities.GetType().Name, _cache);
+                    HelperCache<TEntity>.AddCache(reverseMapEntities, _cache);
                     _logger.LoggingMessageWarning("JobOffer.API", (int)HttpStatusCode.InternalServerError, "ROWS IS NULL !", HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "", " - Put(IList<TEntityViewModel> entities)", _hostEnvironment.ContentRootPath);
                     return StatusCode(500,
                     new
@@ -298,7 +298,7 @@ namespace JobsOffer.Api.Server.GenericController
                         Message = "Updated Rows is null !"
                     });
                 }
-                HelperCache.AddCache(rows, rows.GetType().Name, _cache);
+                HelperCache<TEntity>.AddCache(rows, _cache);
                 var mapperRows = _mapper.Map<IList<TEntityViewModel>>(rows);
                 await _realTimeHub.Clients.All.SendAsync("Rows Updated !", mapperRows);
                 return Ok(mapperRows);
@@ -340,7 +340,7 @@ namespace JobsOffer.Api.Server.GenericController
                         Message = "Deleted Row is null !"
                     });
                 }
-                HelperCache.DeleteCache(row, row.GetType().Name, _cache);
+                HelperCache<TEntity>.DeleteCache(row, _cache);
                 var mapperRow = _mapper.Map<TEntityViewModel>(row);
                 await _realTimeHub.Clients.All.SendAsync("Row Deleted !", mapperRow);
                 return Ok(mapperRow);
@@ -380,7 +380,7 @@ namespace JobsOffer.Api.Server.GenericController
                         Message = "Deleted Rows is null !"
                     });
                 }
-                HelperCache.DeleteCache(rows, rows.GetType().Name, _cache);
+                HelperCache<TEntity>.DeleteCache(rows, _cache);
                 var mapperRows = _mapper.Map<IList<TEntityViewModel>>(rows);
                 await _realTimeHub.Clients.All.SendAsync("Rows Deleted !", mapperRows);
                 return Ok(mapperRows);
@@ -388,6 +388,37 @@ namespace JobsOffer.Api.Server.GenericController
             catch (Exception ex)
             {
                 _logger.LoggingMessageError("JobOffer.API", (int)HttpStatusCode.InternalServerError, HttpStatusCode.InternalServerError.ToString(), HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "" + " - Delete(IList<TEntityViewModel> entities)", ex, _hostEnvironment.ContentRootPath);
+                return StatusCode(500, new
+                {
+                    Message = "Get failed !"
+                });
+            }
+        }
+        #endregion
+
+        #region CACHE DATA
+
+        [HttpGet("CacheData")]
+        public IActionResult Get()
+        {
+            try
+            {
+                var list = _genericService.GetEntitiesAsync().ToList();
+                if (list == null)
+                {
+                    _logger.LoggingMessageWarning("JobOffer.API", (int)HttpStatusCode.NotFound, HttpStatusCode.NotFound.ToString(), HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "", " - Get() Cache Data", _hostEnvironment.ContentRootPath);
+                    return NotFound(new
+                    {
+                        Message = "List not found !",
+                        StatusCode = (int)HttpStatusCode.NotFound + " - " + HttpStatusCode.NotFound.ToString()
+                    });
+                }
+                var mappedList = _mapper.Map<IList<TEntityViewModel>>(list);
+                return Ok(mappedList);
+            }
+            catch (Exception ex)
+            {
+                _logger.LoggingMessageError("JobOffer.API", (int)HttpStatusCode.InternalServerError, HttpStatusCode.InternalServerError.ToString(), HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "" + " - Get() Cache Data", ex, _hostEnvironment.ContentRootPath);
                 return StatusCode(500, new
                 {
                     Message = "Get failed !"

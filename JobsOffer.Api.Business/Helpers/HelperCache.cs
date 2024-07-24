@@ -1,91 +1,77 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using JobsOffer.Api.Infrastructure.Models.Classes;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace JobsOffer.Api.Business.Helpers
 {
-    public class HelperCache
+    public class HelperCache<TEntity> where TEntity : Entity
     {
-        public static void AddCache(object entity, string typeEntity, IMemoryCache cache)
+        public static void AddCache(TEntity entity, IMemoryCache cache)
         {
-            if (entity != null)
+            if (entity is null) return;
+            var cacheKey = $"{typeof(TEntity).Name}Cache";
+            var cachedListData = cache.GetOrCreate(cacheKey, entry => new List<TEntity>());
+            if (cachedListData is not null)
             {
-                var cacheKey = $"{typeEntity}Cache";
-#pragma warning disable CS8600 // Conversion de littéral ayant une valeur null ou d'une éventuelle valeur null en type non-nullable.
-                if (cache.TryGetValue(cacheKey, out IList<object> cachedListData))
-                {
-                    if (cachedListData != null)
-                    {
-                        cachedListData.Add(entity);
-                        cache.Remove(cacheKey);
-                        cache.Set(cacheKey, cachedListData);
-                    }
-                }
-#pragma warning restore CS8600 // Conversion de littéral ayant une valeur null ou d'une éventuelle valeur null en type non-nullable.
+                cachedListData.Add(entity);
+                cache.Set(cacheKey, cachedListData);
             }
         }
 
-        public static void AddCache(IList<object> entities, string typeEntity, IMemoryCache cache)
+
+        public static void AddCache(IList<TEntity> entities, IMemoryCache cache)
         {
-            if (entities != null && entities.Any() && entities.Count > 0)
+            if (entities is null || !entities.Any()) return;
+            var cacheKey = $"{typeof(TEntity).Name}Cache";
+            var cachedListData = cache.GetOrCreate(cacheKey, entry => new List<TEntity>());
+            if (cachedListData is not null)
             {
-                var cacheKey = $"{typeEntity}Cache";
-#pragma warning disable CS8600 // Conversion de littéral ayant une valeur null ou d'une éventuelle valeur null en type non-nullable.
-                if (cache.TryGetValue(cacheKey, out List<object> cachedListData))
-                {
-                    if (cachedListData != null)
-                    {
-                        cachedListData.AddRange(entities);
-                        cache.Remove(cacheKey);
-                        cache.Set(cacheKey, cachedListData);
-                    }
-                }
-#pragma warning restore CS8600 // Conversion de littéral ayant une valeur null ou d'une éventuelle valeur null en type non-nullable.
+                cachedListData.AddRange(entities);
+                cache.Set(cacheKey, cachedListData);
             }
         }
 
-        public static void DeleteCache(object entity, string typeEntity, IMemoryCache cache)
+
+        public static void DeleteCache(TEntity entity, IMemoryCache cache)
         {
-            if (entity != null)
-            {
-                var cacheKey = $"{typeEntity}Cache";
+            if (entity is null) return;
+            var cacheKey = $"{typeof(TEntity).Name}Cache";
 #pragma warning disable CS8600 // Conversion de littéral ayant une valeur null ou d'une éventuelle valeur null en type non-nullable.
-                if (cache.TryGetValue(cacheKey, out IList<object> cachedListData))
+            if (cache.TryGetValue(cacheKey, out IList<TEntity> cachedListData))
+            {
+                var itemToRemove = cachedListData?.FirstOrDefault(x => x.Equals(entity));
+                if (itemToRemove is not null)
                 {
-                    if (cachedListData != null)
-                    {
-                        cachedListData.Remove(entity);
-                        cache.Remove(cacheKey);
-                        cache.Set(cacheKey, cachedListData);
-                    }
+                    cachedListData?.Remove(itemToRemove);
+                    cache.Set(cacheKey, cachedListData);
                 }
-#pragma warning restore CS8600 // Conversion de littéral ayant une valeur null ou d'une éventuelle valeur null en type non-nullable.
             }
+#pragma warning restore CS8600 // Conversion de littéral ayant une valeur null ou d'une éventuelle valeur null en type non-nullable.
         }
 
-        public static void DeleteCache(IList<object> entities, string typeEntity, IMemoryCache cache)
+
+        public static void DeleteCache(IList<TEntity> entities, IMemoryCache cache)
         {
-            if (entities != null && entities.Any() && entities.Count > 0)
-            {
-                var cacheKey = $"{typeEntity}Cache";
+            if (entities is null || !entities.Any()) return;
+            var cacheKey = $"{typeof(TEntity).Name}Cache";
 #pragma warning disable CS8600 // Conversion de littéral ayant une valeur null ou d'une éventuelle valeur null en type non-nullable.
-                if (cache.TryGetValue(cacheKey, out IList<object> cachedListData))
+            if (cache.TryGetValue(cacheKey, out IList<TEntity> cachedListData))
+            {
+                if (cachedListData is not null)
                 {
-                    if (cachedListData != null)
+                    foreach (var entity in entities)
                     {
-                        foreach (var entity in entities)
+                        var itemToRemove = cachedListData.FirstOrDefault(x => x.Equals(entity));
+                        if (itemToRemove is not null)
                         {
-                            cachedListData.Remove(entity);
+                            cachedListData.Remove(itemToRemove);
                         }
-                        cache.Remove(cacheKey);
-                        cache.Set(cacheKey, cachedListData);
                     }
+                    cache.Set(cacheKey, cachedListData);
                 }
-#pragma warning restore CS8600 // Conversion de littéral ayant une valeur null ou d'une éventuelle valeur null en type non-nullable.
             }
+#pragma warning restore CS8600 // Conversion de littéral ayant une valeur null ou d'une éventuelle valeur null en type non-nullable.
         }
+
+
     }
 }
