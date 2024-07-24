@@ -17,7 +17,6 @@ namespace JobsOffer.Api.Business.Helpers
             }
         }
 
-
         public static void AddCache(IList<TEntity> entities, IMemoryCache cache)
         {
             if (entities is null || !entities.Any()) return;
@@ -28,7 +27,6 @@ namespace JobsOffer.Api.Business.Helpers
                 cache.Set(CacheKey, cachedListData);
             }
         }
-
 
         public static void DeleteCache(TEntity entity, IMemoryCache cache)
         {
@@ -45,7 +43,6 @@ namespace JobsOffer.Api.Business.Helpers
             }
 #pragma warning restore CS8600 // Conversion de littéral ayant une valeur null ou d'une éventuelle valeur null en type non-nullable.
         }
-
 
         public static void DeleteCache(IList<TEntity> entities, IMemoryCache cache)
         {
@@ -69,7 +66,5 @@ namespace JobsOffer.Api.Business.Helpers
             }
 #pragma warning restore CS8600 // Conversion de littéral ayant une valeur null ou d'une éventuelle valeur null en type non-nullable.
         }
-
-
     }
 }
