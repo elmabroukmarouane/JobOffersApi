@@ -149,9 +149,12 @@ namespace JobsOffer.Api.Business.Cqrs.Queries.Classes
 
         private string GetIncludes()
         {
-            var typesList = Helper.GetAttributeTypes(typeof(TEntity)).Where(x => x.BaseType == typeof(Entity)).ToList();
+            var typesList = Helper.GetAttributeTypes(typeof(TEntity)).Where(x => x.TypeClass == TypeClass.Collection || x.TypeClass == TypeClass.Class).ToList();
             var includesList = new List<string>();
-            typesList.ForEach(x => { includesList.Add($"{x.Name}s"); });
+            typesList.ForEach(x => {
+                var propertyTypeName = x.PropertyType.Name + (x.TypeClass == TypeClass.Collection ? "s" : string.Empty);
+                includesList.Add(propertyTypeName); 
+            });
             return string.Join(',', includesList.ToArray());
         }
         #endregion
