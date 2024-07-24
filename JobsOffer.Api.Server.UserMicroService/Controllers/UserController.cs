@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using JobsOffer.Api.Business.Helpers;
 using JobsOffer.Api.Business.Helpers.LambdaManagement.Helper;
+using JobsOffer.Api.Business.Helpers.LambdaManagement.Models;
 using JobsOffer.Api.Business.Services.Interfaces;
 using JobsOffer.Api.Infrastructure.Models.Classes;
 using JobsOffer.Api.Server.DtoModel.Models;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System.Net;
 
 namespace JobsOffer.Api.Server.UserMicroService.Controllers
@@ -25,6 +27,7 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
         protected readonly IHostEnvironment _hostEnvironment;
         protected readonly IConfiguration _configuration;
         protected readonly IHubContext<RealTimeHub> _realTimeHub;
+        protected readonly IMemoryCache _cache;
         #endregion
 
         #region CONSTRUCTOR
@@ -34,7 +37,8 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
             ILogger<GenericController.GenericController<User, UserViewModel>> logger,
             IHostEnvironment hostEnvironment,
             IConfiguration configuration,
-            IHubContext<RealTimeHub> realTimeHub)
+            IHubContext<RealTimeHub> realTimeHub,
+            IMemoryCache cache)
         {
             _userService = userService ?? throw new ArgumentException(null, nameof(userService));
             _mapper = mapper ?? throw new ArgumentNullException(null, nameof(mapper));
@@ -42,6 +46,7 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
             _hostEnvironment = hostEnvironment ?? throw new ArgumentNullException(null, nameof(hostEnvironment));
             _configuration = configuration ?? throw new ArgumentNullException(null, nameof(configuration));
             _realTimeHub = realTimeHub ?? throw new ArgumentNullException(null, nameof(realTimeHub));
+            _cache = cache ?? throw new ArgumentNullException(null, nameof(cache));
 
         }
         #endregion
@@ -160,6 +165,7 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
                         Message = "Added Row is null !"
                     });
                 }
+                HelperCache.AddCache(row, row.GetType().Name, _cache);
                 var mapperRow = _mapper.Map<UserViewModel>(row);
                 await _realTimeHub.Clients.All.SendAsync("Row Created !", mapperRow);
                 return Ok(mapperRow);
@@ -199,6 +205,7 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
                         Message = "Added Rows is null !"
                     });
                 }
+                HelperCache.AddCache(rows, rows.GetType().Name, _cache);
                 var mapperRows = _mapper.Map<IList<UserViewModel>>(rows);
                 await _realTimeHub.Clients.All.SendAsync("Rows Created !", mapperRows);
                 return Ok(mapperRows);
@@ -229,10 +236,12 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
                         Message = "Entity received is null !"
                     });
                 }
+                HelperCache.DeleteCache(entity, entity.GetType().Name, _cache);
                 var reverseMapEntity = _mapper.Map<User>(entity);
                 var row = await _userService.UpdateAsync(reverseMapEntity);
                 if (row == null)
                 {
+                    HelperCache.AddCache(entity, entity.GetType().Name, _cache);
                     _logger.LoggingMessageWarning("JobOffer.API", (int)HttpStatusCode.InternalServerError, "ROW IS NULL !", HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "", " - Put(UserViewModel entity, int id)", _hostEnvironment.ContentRootPath);
                     return StatusCode(500,
                     new
@@ -240,6 +249,7 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
                         Message = "Updated Row is null !"
                     });
                 }
+                HelperCache.AddCache(row, row.GetType().Name, _cache);
                 var mapperRow = _mapper.Map<UserViewModel>(row);
                 await _realTimeHub.Clients.All.SendAsync("Row Updated !", mapperRow);
                 return Ok(mapperRow);
@@ -268,10 +278,12 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
                         Message = "Entity received is null !"
                     });
                 }
+                HelperCache.DeleteCache(entities, entities.GetType().Name, _cache);
                 var reverseMapEntities = _mapper.Map<IList<User>>(entities);
                 var rows = await _userService.UpdateAsync(reverseMapEntities);
                 if (rows == null)
                 {
+                    HelperCache.AddCache(entities, entities.GetType().Name, _cache);
                     _logger.LoggingMessageWarning("JobOffer.API", (int)HttpStatusCode.InternalServerError, "ROWS IS NULL !", HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "", " - Put(IList<UserViewModel> entities)", _hostEnvironment.ContentRootPath);
                     return StatusCode(500,
                     new
@@ -279,6 +291,7 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
                         Message = "Updated Rows is null !"
                     });
                 }
+                HelperCache.AddCache(rows, rows.GetType().Name, _cache);
                 var mapperRows = _mapper.Map<IList<UserViewModel>>(rows);
                 await _realTimeHub.Clients.All.SendAsync("Rows Updated !", mapperRows);
                 return Ok(mapperRows);
@@ -320,6 +333,7 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
                         Message = "Deleted Row is null !"
                     });
                 }
+                HelperCache.DeleteCache(row, row.GetType().Name, _cache);
                 var mapperRow = _mapper.Map<UserViewModel>(row);
                 await _realTimeHub.Clients.All.SendAsync("Row Deleted !", mapperRow);
                 return Ok(mapperRow);
@@ -359,6 +373,7 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
                         Message = "Deleted Rows is null !"
                     });
                 }
+                HelperCache.DeleteCache(rows, rows.GetType().Name, _cache);
                 var mapperRows = _mapper.Map<IList<UserViewModel>>(rows);
                 await _realTimeHub.Clients.All.SendAsync("Rows Deleted !", mapperRows);
                 return Ok(mapperRows);

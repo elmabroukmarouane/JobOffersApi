@@ -13,7 +13,8 @@ namespace JobsOffer.Api.Business.Services.Interfaces
             string splitChar = ",",
             bool disableTracking = true,
             int take = 0,
-            int offset = 0);
+            int offset = 0,
+            bool inDatabase = false);
         Task<TEntity?> GetEntitiesAsync(TEntity entity);
         #endregion
 

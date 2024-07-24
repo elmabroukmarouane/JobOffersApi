@@ -13,7 +13,8 @@ namespace JobsOffer.Api.Business.Services.Interfaces
             string splitChar = ",",
             bool disableTracking = true,
             int take = 0,
-            int offset = 0);
+            int offset = 0,
+            bool inDatabase = false);
         Task<User?> GetEntitiesAsync(User entity);
         #endregion
 
@@ -33,8 +34,8 @@ namespace JobsOffer.Api.Business.Services.Interfaces
         #endregion
 
         #region AUTENTICATION
-        Task<User?> Authenticate(User user);
-        Task<bool> Logout(User user);
+        Task<User?> Authenticate(User user, bool inDatabase = false);
+        Task<bool> Logout(User user, bool inDatabase = false);
         #endregion
 
         #region TOKEN

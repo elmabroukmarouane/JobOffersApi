@@ -1,6 +1,4 @@
-﻿using JobsOffer.Api.Business.Helpers.LambdaManagement.Models;
-
-namespace JobsOffer.Api.Business.Helpers
+﻿namespace JobsOffer.Api.Business.Helpers.LambdaManagement.Models
 {
     public class FilterDataModel
     {

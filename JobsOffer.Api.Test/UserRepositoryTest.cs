@@ -12,6 +12,8 @@ using Bogus;
 using JobsOffer.Api.Infrastructure.DatabaseContext.Seed.FakeData;
 using System.Linq.Expressions;
 using JobsOffer.Api.Business.Helpers;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace JobsOffer.Api.Test
 {
@@ -287,10 +289,11 @@ namespace JobsOffer.Api.Test
                 ",",
                 true,
                 0,
-                0)).Returns(entitiesMock);
+                0,
+                true)).Returns(entitiesMock);
 
                 // Act
-                var entities = (IList<User>)_genericService.GetEntitiesAsync(includes: "Jobs").ToList();
+                var entities = (IList<User>)_genericService.GetEntitiesAsync(includes: "Jobs", inDatabase: true).ToList();
 
                 // Assert
                 var entitiesMockAsync = (IList<User>)entitiesMock.ToList();
@@ -329,10 +332,11 @@ namespace JobsOffer.Api.Test
                 ",",
                 true,
                 0,
-                0)).Returns(entityMock);
+                0,
+                true)).Returns(entityMock);
 
                 // Act
-                var entity = _genericService.GetEntitiesAsync(expression: x => x.Id == 1).SingleOrDefault();
+                var entity = _genericService.GetEntitiesAsync(expression: x => x.Id == 1, inDatabase: true).SingleOrDefault();
 
                 // Assert
                 var entityMockAsync = entityMock.SingleOrDefault();
@@ -360,7 +364,7 @@ namespace JobsOffer.Api.Test
 
                 // Act
 #pragma warning disable CS8604 // Existence possible d'un argument de référence null.
-                var entity = await _genericService.Authenticate(entityMock);
+                var entity = await _genericService.Authenticate(entityMock, true);
 #pragma warning restore CS8604 // Existence possible d'un argument de référence null.
 
                 // Assert
@@ -381,7 +385,7 @@ namespace JobsOffer.Api.Test
                 var entityMock = new User() { Email = string.Empty, Password = null };
 
                 // Act
-                var entity = await _genericService.Authenticate(entityMock);
+                var entity = await _genericService.Authenticate(entityMock, true);
 
                 // Assert
                 Assert.Null(entity);
@@ -417,10 +421,11 @@ namespace JobsOffer.Api.Test
                 ",",
                 true,
                 0,
-                0)).Returns(entityMockQueryable);
+                0,
+                true)).Returns(entityMockQueryable);
 
                 // Act
-                var entity = await _genericService.Authenticate(new User() { Email = "user1@gmail.com", Password = "123456" });
+                var entity = await _genericService.Authenticate(new User() { Email = "user1@gmail.com", Password = "123456" }, true);
 
                 // Assert
                 Assert.Null(entity);
@@ -456,10 +461,11 @@ namespace JobsOffer.Api.Test
                 ",",
                 true,
                 0,
-                0)).Returns(entityMockQueryable);
+                0,
+                true)).Returns(entityMockQueryable);
 
                 // Act
-                var entity = await _genericService.Authenticate(new User() { Email = "user1@test.com", Password = "123456" });
+                var entity = await _genericService.Authenticate(new User() { Email = "user1@test.com", Password = "123456" }, true);
 
                 // Assert
                 Assert.NotNull(entity);
@@ -482,7 +488,7 @@ namespace JobsOffer.Api.Test
 
                 // Act
 #pragma warning disable CS8604 // Existence possible d'un argument de référence null.
-                var entity = await _genericService.Logout(entityMock);
+                var entity = await _genericService.Logout(entityMock, true);
 #pragma warning restore CS8604 // Existence possible d'un argument de référence null.
 
                 // Assert
@@ -520,10 +526,11 @@ namespace JobsOffer.Api.Test
                 ",",
                 true,
                 0,
-                0)).Returns(entityMockQueryable);
+                0,
+                true)).Returns(entityMockQueryable);
 
                 // Act
-                var isLogout = await _genericService.Logout(new User() { Email = "user1@test.com", IsOnLine = true, Id = 1 });
+                var isLogout = await _genericService.Logout(new User() { Email = "user1@gmail.com", IsOnLine = true, Id = 1 }, true);
 
                 // Assert
                 Assert.False(isLogout);
@@ -560,10 +567,11 @@ namespace JobsOffer.Api.Test
                 ",",
                 true,
                 0,
-                0)).Returns(entityMockQueryable);
+                0,
+                true)).Returns(entityMockQueryable);
 
                 // Act
-                var isLogout = await _genericService.Logout(new User() { Email = "user1@test.com", IsOnLine = true, Id = 1 });
+                var isLogout = await _genericService.Logout(new User() { Email = "user1@test.com", IsOnLine = true, Id = 1 }, true);
 
                 // Assert
                 Assert.True(isLogout);
