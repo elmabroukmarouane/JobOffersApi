@@ -3,6 +3,8 @@ using JobsOffer.Api.Business.Helpers;
 using JobsOffer.Api.Business.Helpers.LambdaManagement.Helper;
 using JobsOffer.Api.Business.Helpers.LambdaManagement.Models;
 using JobsOffer.Api.Business.Services.Interfaces;
+using JobsOffer.Api.Business.Services.SendEmails.Interface;
+using JobsOffer.Api.Business.Services.SendEmails.Models.Classes;
 using JobsOffer.Api.Infrastructure.Models.Classes;
 using JobsOffer.Api.Server.Extensions.Logging;
 using JobsOffer.Api.Server.RealTime.Class;
@@ -28,6 +30,7 @@ namespace JobsOffer.Api.Server.GenericController
         protected readonly IHostEnvironment _hostEnvironment;
         protected readonly IHubContext<RealTimeHub> _realTimeHub;
         protected readonly IMemoryCache _cache;
+        protected readonly ISendMailService _sendMailService;
         #endregion
 
         #region CONSTRUCTOR
@@ -37,14 +40,16 @@ namespace JobsOffer.Api.Server.GenericController
             ILogger<GenericController<TEntity, TEntityViewModel>> logger,
             IHostEnvironment hostEnvironment,
             IHubContext<RealTimeHub> hubContext,
-            IMemoryCache cache)
+            IMemoryCache cache,
+            ISendMailService sendMailService)
         {
             _genericService = genericService ?? throw new ArgumentException(null, nameof(genericService));
-            _mapper = mapper ?? throw new ArgumentNullException(null, nameof(mapper));
-            _logger = logger ?? throw new ArgumentNullException(null, nameof(logger));
-            _hostEnvironment = hostEnvironment ?? throw new ArgumentNullException(null,nameof(hostEnvironment));
-            _realTimeHub = hubContext ?? throw new ArgumentNullException(null, nameof(hubContext));
-            _cache = cache ?? throw new ArgumentNullException(null, nameof(cache));
+            _mapper = mapper ?? throw new ArgumentException(null, nameof(mapper));
+            _logger = logger ?? throw new ArgumentException(null, nameof(logger));
+            _hostEnvironment = hostEnvironment ?? throw new ArgumentException(null,nameof(hostEnvironment));
+            _realTimeHub = hubContext ?? throw new ArgumentException(null, nameof(hubContext));
+            _cache = cache ?? throw new ArgumentException(null, nameof(cache));
+            _sendMailService = sendMailService ?? throw new ArgumentException(null, nameof(sendMailService));
         }
         #endregion
 
@@ -419,6 +424,47 @@ namespace JobsOffer.Api.Server.GenericController
             catch (Exception ex)
             {
                 _logger.LoggingMessageError("JobOffer.API", (int)HttpStatusCode.InternalServerError, HttpStatusCode.InternalServerError.ToString(), HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "" + " - Get() Cache Data", ex, _hostEnvironment.ContentRootPath);
+                return StatusCode(500, new
+                {
+                    Message = "Get failed !"
+                });
+            }
+        }
+        #endregion
+
+        #region SEND EMAILS
+        [HttpPost("SendEmails")]
+        public virtual async Task<IActionResult> SendEmails(EmailMessage emailMessage)
+        {
+            try
+            {
+                if (emailMessage == null)
+                {
+                    _logger.LoggingMessageWarning("JobOffer.API", (int)HttpStatusCode.InternalServerError, "emailMessage IS NULL !", HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "", " - SendEmails(EmailMessage emailMessage)", _hostEnvironment.ContentRootPath);
+                    return StatusCode(500,
+                    new
+                    {
+                        Message = "emailMessage received is null !"
+                    });
+                }
+                var response = await _sendMailService.Send(emailMessage);
+                if (response == null)
+                {
+                    _logger.LoggingMessageWarning("JobOffer.API", (int)HttpStatusCode.InternalServerError, "RESPONSE IS NULL !", HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "", " - SendEmails(EmailMessage emailMessage)", _hostEnvironment.ContentRootPath);
+                    return StatusCode(500,
+                    new
+                    {
+                        Message = "Response is null !"
+                    });
+                }
+                return Ok(new
+                {
+                    Message = response
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LoggingMessageError("JobOffer.API", (int)HttpStatusCode.InternalServerError, HttpStatusCode.InternalServerError.ToString(), HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "" + " - SendEmails(EmailMessage emailMessage)", ex, _hostEnvironment.ContentRootPath);
                 return StatusCode(500, new
                 {
                     Message = "Get failed !"

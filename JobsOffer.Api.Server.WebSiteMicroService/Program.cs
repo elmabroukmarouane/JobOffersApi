@@ -14,11 +14,12 @@ builder.Services.AddControllers()
                     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Configuration.AddJsonFile("appsettings.UserMicroService.json", optional: true, reloadOnChange: true);
+builder.Configuration.AddJsonFile("appsettings.WebSiteMicroService.json", optional: true, reloadOnChange: true);
 builder.Services.AddMemoryCache();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSWAGGER();
 builder.Services.AddConnection(builder.Configuration, builder.Environment);
+builder.Services.AddEmailSmtpConfigurationExtension(builder.Configuration);
 builder.Services.AddSERVICES(builder.Configuration, builder.Environment);
 builder.Services.AddJWT(builder.Configuration);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
