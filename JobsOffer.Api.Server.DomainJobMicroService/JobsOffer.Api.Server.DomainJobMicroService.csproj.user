@@ -4,7 +4,7 @@
     <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup>
-    <ActiveDebugProfile>IIS Express</ActiveDebugProfile>
+    <ActiveDebugProfile>http</ActiveDebugProfile>
     <NameOfLastUsedPublishProfile>C:\Users\MelPC\source\repos\JobsOffer.Api.Server\JobsOffer.Api.Server.DomainJobMicroService\Properties\PublishProfiles\DomainJobMicroService.pubxml</NameOfLastUsedPublishProfile>
   </PropertyGroup>
 </Project>

@@ -1,3 +1,4 @@
+using JobsOffer.Api.Server.RealTime.Class;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 
@@ -13,6 +14,10 @@ builder.Services.AddControllers();
 builder.Configuration.AddJsonFile("appsettings.ApiGateway.json", optional: true, reloadOnChange: true);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+});
 
 var app = builder.Build();
 
@@ -26,6 +31,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<RealTimeHub>("/realTimeHub");
 
 app.UseOcelot().Wait();
 
