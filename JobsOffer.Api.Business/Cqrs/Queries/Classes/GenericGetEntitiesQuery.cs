@@ -29,8 +29,8 @@ namespace JobsOffer.Api.Business.Cqrs.Queries.Classes
             ) 
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentException(null, nameof(unitOfWork));
-            if(cache != null) _cache = cache ?? throw new ArgumentNullException(null, nameof(cache));
-            if(distributedCache != null) _distributedCache = distributedCache ?? throw new ArgumentNullException(null, nameof(distributedCache));
+            if(cache != null) _cache = cache ?? throw new ArgumentException(null, nameof(cache));
+            if(distributedCache != null) _distributedCache = distributedCache ?? throw new ArgumentException(null, nameof(distributedCache));
             if(cache != null) CacheKey = $"{typeof(TEntity).Name}Cache";
         }
         #endregion

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using JobsOffer.Api.Business.Services.Interfaces;
+using JobsOffer.Api.Business.Services.SendEmails.Interface;
 using JobsOffer.Api.Infrastructure.Models.Classes;
 using JobsOffer.Api.Server.DtoModel.Models;
 using JobsOffer.Api.Server.GenericController;
@@ -19,7 +20,8 @@ namespace JobsOffer.Api.Server.DomainJobMicroService.Controllers
             IMapper mapper, ILogger<GenericController<DomainJob, DomainJobViewModel>> logger,
             IHostEnvironment hostEnvironment, 
             IHubContext<RealTimeHub> hubContext,
-            IMemoryCache cache) : base(genericService, mapper, logger, hostEnvironment, hubContext, cache)
+            IMemoryCache cache,
+            ISendMailService sendMailService) : base(genericService, mapper, logger, hostEnvironment, hubContext, cache, sendMailService)
         {
         }
     }

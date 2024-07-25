@@ -33,7 +33,7 @@ namespace JobsOffer.Api.Infrastructure.DatabaseContext.Seed.FakeData
 
         public static string? CreateHashPassword(string? password)
         {
-            if (string.IsNullOrEmpty(password)) throw new ArgumentNullException("password");
+            if (string.IsNullOrEmpty(password)) throw new ArgumentException("password");
             if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
             using (var sha512Hash = SHA512.Create())
             {

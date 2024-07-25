@@ -12,12 +12,18 @@ using JobsOffer.Api.Business.Cqrs.Commands.Classes;
 using JobsOffer.Api.Business.Cqrs.Queries.Classes;
 using JobsOffer.Api.Business.Cqrs.Queries.Interfaces;
 using JobsOffer.Api.Server.RealTime.Class;
+using JobsOffer.Api.Business.Services.SendEmails.Classe;
+using JobsOffer.Api.Business.Services.SendEmails.Interface;
+using MailKit.Net.Smtp;
 
 namespace JobsOffer.Api.Server.Extensions.Add;
 public static class AddServices
 {
     public static void AddSERVICES(this IServiceCollection self, IConfiguration configuration, IHostEnvironment hostEnvironment)
     {
+        self.AddSingleton(configuration);
+        self.AddSingleton(hostEnvironment);
+
         self.AddTransient<IUnitOfWork<DbContextJobsOffer>, UnitOfWork<DbContextJobsOffer>>();
 
         self.AddTransient<IGenericCreateCommand<DomainJob>, GenericCreateCommand<DomainJob>>();
@@ -62,12 +68,13 @@ public static class AddServices
         self.AddTransient<IGenericDeleteQuery<WebSite>, GenericDeleteQuery<WebSite>>();
         self.AddTransient<IGenericService<WebSite>, GenericService<WebSite>>();
 
+        self.AddTransient<ISmtpClient, SmtpClient>();
+        self.AddTransient<ISendMailService, SendMailService>();
+
         self.AddTransient<IRedisService, RedisService>();
 
         self.AddTransient<RealTimeHub>();
 
-        self.AddSingleton(configuration);
-        self.AddSingleton(hostEnvironment);
         self.AddSingleton<IRedisConnectionFactory>(new RedisConnectionFactory(configuration.GetConnectionString("RedisConnection")!));
     }
 }

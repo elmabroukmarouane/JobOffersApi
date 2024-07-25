@@ -18,6 +18,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSWAGGER();
 builder.Services.AddConnection(builder.Configuration, builder.Environment);
+builder.Services.AddEmailSmtpConfigurationExtension(builder.Configuration);
 builder.Services.AddSERVICES(builder.Configuration, builder.Environment);
 builder.Services.AddJWT(builder.Configuration);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
