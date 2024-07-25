@@ -1,19 +1,19 @@
 {
   "Routes": [
     {
-      "DownstreamPathTemplate": "/api/DomainJob",
+      "DownstreamPathTemplate": "/api/DomainJob/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 30216
+          "Port": 5284
         }
       ],
-      "UpstreamPathTemplate": "/DomainJob",
+      "UpstreamPathTemplate": "/DomainJob/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/Favori",
+      "DownstreamPathTemplate": "/api/Favori/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -21,11 +21,11 @@
           "Port": 25751
         }
       ],
-      "UpstreamPathTemplate": "/Favori",
+      "UpstreamPathTemplate": "/Favori/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/Job",
+      "DownstreamPathTemplate": "/api/Job/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -33,11 +33,11 @@
           "Port": 61613
         }
       ],
-      "UpstreamPathTemplate": "/Job",
+      "UpstreamPathTemplate": "/Job/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/Profil",
+      "DownstreamPathTemplate": "/api/Profil/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -45,7 +45,7 @@
           "Port": 57242
         }
       ],
-      "UpstreamPathTemplate": "/Profil",
+      "UpstreamPathTemplate": "/Profil/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
@@ -57,11 +57,11 @@
           "Port": 39099
         }
       ],
-      "UpstreamPathTemplate": "/ProfilDomainJob",
+      "UpstreamPathTemplate": "/ProfilDomainJob/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/WebSite",
+      "DownstreamPathTemplate": "/api/WebSite/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -69,11 +69,11 @@
           "Port": 29729
         }
       ],
-      "UpstreamPathTemplate": "/WebSite",
+      "UpstreamPathTemplate": "/WebSite/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/User",
+      "DownstreamPathTemplate": "/api/User/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -81,7 +81,19 @@
           "Port": 10448
         }
       ],
-      "UpstreamPathTemplate": "/User",
+      "UpstreamPathTemplate": "/User/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/realTimeHub",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 10448
+        }
+      ],
+      "UpstreamPathTemplate": "/realTimeHub",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     }
   ],
