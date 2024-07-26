@@ -2,6 +2,7 @@
 using JobsOffer.Api.Business.Helpers;
 using JobsOffer.Api.Business.Helpers.LambdaManagement.Helper;
 using JobsOffer.Api.Business.Helpers.LambdaManagement.Models;
+using JobsOffer.Api.Business.Services.Classes;
 using JobsOffer.Api.Business.Services.Interfaces;
 using JobsOffer.Api.Business.Services.SendEmails.Interface;
 using JobsOffer.Api.Business.Services.SendEmails.Models.Classes;
@@ -58,11 +59,11 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
 
         #region READ
         [HttpGet]
-        public virtual async Task<IActionResult> Get(string? includes = null)
+        public virtual IActionResult Get(string? includes = null)
         {
             try
             {
-                var list = await _userService.GetEntitiesAsync(includes: includes).ToListAsync();
+                var list = _userService.GetEntitiesAsync(includes: includes).ToList();
                 if (list == null)
                 {
                     _logger.LoggingMessageWarning("JobOffer.API", (int)HttpStatusCode.NotFound, HttpStatusCode.NotFound.ToString(), HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "", " - Get()", _hostEnvironment.ContentRootPath);
@@ -86,11 +87,11 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public virtual async Task<IActionResult> Get(int id, string? includes = null)
+        public virtual IActionResult Get(int id, string? includes = null)
         {
             try
             {
-                var row = await _userService.GetEntitiesAsync(expression: x => x.Id == id, includes: includes).SingleOrDefaultAsync();
+                var row = _userService.GetEntitiesAsync(expression: x => x.Id == id, includes: includes).SingleOrDefault();
                 if (row == null)
                 {
                     _logger.LoggingMessageWarning("JobOffer.API", (int)HttpStatusCode.NotFound, HttpStatusCode.NotFound.ToString(), HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "", " - Get(int id)", _hostEnvironment.ContentRootPath);
@@ -115,12 +116,12 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
 
         // TODO : Make the same for orderBy like LambdaExpressionModel
         [HttpPost("filter")]
-        public virtual async Task<IActionResult> Get(FilterDataModel filterDataModel)
+        public virtual IActionResult Get(FilterDataModel filterDataModel)
         {
             try
             {
                 var lambdaExpression = ExpressionBuilder.BuildLambda<User>(filterDataModel.LambdaExpressionModel);
-                var filteredRows = await _userService.GetEntitiesAsync(lambdaExpression, includes: filterDataModel.Includes, splitChar: filterDataModel.SplitChar, disableTracking: filterDataModel.DisableTracking, take: filterDataModel.Take, offset: filterDataModel.Offset).ToListAsync();
+                var filteredRows = _userService.GetEntitiesAsync(lambdaExpression, includes: filterDataModel.Includes, splitChar: filterDataModel.SplitChar, disableTracking: filterDataModel.DisableTracking, take: filterDataModel.Take, offset: filterDataModel.Offset).ToList();
                 if (filteredRows == null)
                 {
                     _logger.LoggingMessageWarning("JobOffer.API", (int)HttpStatusCode.NotFound, HttpStatusCode.NotFound.ToString(), HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "", " - Post(filter)", _hostEnvironment.ContentRootPath);
@@ -478,6 +479,37 @@ namespace JobsOffer.Api.Server.UserMicroService.Controllers
                 return StatusCode(500, new
                 {
                     Message = "Logout failed !"
+                });
+            }
+        }
+        #endregion
+
+        #region CACHE DATA
+
+        [HttpGet("CacheData")]
+        public IActionResult Get()
+        {
+            try
+            {
+                var list = _userService.GetEntitiesAsync().ToList();
+                if (list == null)
+                {
+                    _logger.LoggingMessageWarning("JobOffer.API", (int)HttpStatusCode.NotFound, HttpStatusCode.NotFound.ToString(), HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "", " - Get() Cache Data", _hostEnvironment.ContentRootPath);
+                    return NotFound(new
+                    {
+                        Message = "List not found !",
+                        StatusCode = (int)HttpStatusCode.NotFound + " - " + HttpStatusCode.NotFound.ToString()
+                    });
+                }
+                var mappedList = _mapper.Map<IList<User>>(list);
+                return Ok(mappedList);
+            }
+            catch (Exception ex)
+            {
+                _logger.LoggingMessageError("JobOffer.API", (int)HttpStatusCode.InternalServerError, HttpStatusCode.InternalServerError.ToString(), HttpContext.Request.Method, ControllerContext?.RouteData?.Values["controller"]?.ToString() ?? "", ControllerContext?.RouteData?.Values["action"]?.ToString() ?? "" + " - Get() Cache Data", ex, _hostEnvironment.ContentRootPath);
+                return StatusCode(500, new
+                {
+                    Message = "Get failed !"
                 });
             }
         }

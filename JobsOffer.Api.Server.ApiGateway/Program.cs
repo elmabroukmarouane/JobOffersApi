@@ -5,8 +5,14 @@ using Ocelot.Middleware;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
-builder.Configuration.AddJsonFile("ocelot.json");
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddJsonFile("ocelot.developpement.json");
+}
+else
+{
+    builder.Configuration.AddJsonFile("ocelot.json");
+}
 builder.Services.AddOcelot();
 
 builder.Services.AddControllers();
