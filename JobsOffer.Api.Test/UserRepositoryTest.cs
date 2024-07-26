@@ -12,8 +12,14 @@ using Bogus;
 using JobsOffer.Api.Infrastructure.DatabaseContext.Seed.FakeData;
 using System.Linq.Expressions;
 using JobsOffer.Api.Business.Helpers;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
+using JobsOffer.Api.Business.SendEmails.Interface;
+using JobsOffer.Api.Business.Services.SendEmails.Interface;
+using JobsOffer.Api.Business.Services.SendEmails.Models.Classes;
+using MailKit.Net.Smtp;
+using JobsOffer.Api.Business.SendEmails.Classe;
+using JobsOffer.Api.Business.Services.SendEmails.Classe;
+using MailKit;
+using MimeKit;
 
 namespace JobsOffer.Api.Test
 {
@@ -31,6 +37,11 @@ namespace JobsOffer.Api.Test
         protected readonly IGenericGetEntitiesQuery<User> _genericGetEntitiesQuery;
         protected readonly Mock<IGenericGetEntitiesQuery<User>> _mockGenericGetEntitiesQuery;
         protected readonly IUserService _genericService;
+        protected readonly Mock<ISmtpClient> _mockSmtpClient;
+        protected readonly IEmailConfigurationFactory _emailConfigurationFactory;
+        protected readonly Mock<IEmailConfigurationFactory> _mockEmailConfigurationFactory;
+        protected readonly ISendMailService _sendMailService;
+        private EmailConfiguration _emailConfiguration;
         private IList<User>? _entities { get; set; }
         #endregion
 
@@ -48,6 +59,17 @@ namespace JobsOffer.Api.Test
             _genericGetEntitiesQuery = new GenericGetEntitiesQuery<User>(_mockUnitOfWork.Object);
             _mockGenericGetEntitiesQuery = new Mock<IGenericGetEntitiesQuery<User>>();
             _genericService = new UserService(_mockGenericCreateCommand.Object, _mockGenericUpdateCommand.Object, _mockGenericGetEntitiesQuery.Object, _mockGenericDeleteQuery.Object);
+            _mockSmtpClient = new Mock<ISmtpClient>();
+            _emailConfiguration = new EmailConfiguration()
+            {
+                SmtpServer = "192.168.1.98",
+                SmtpPort = 1025,
+                SmtpUsername = string.Empty,
+                SmtpPassword = string.Empty
+            };
+            _emailConfigurationFactory = new EmailConfigurationFactory(_emailConfiguration);
+            _mockEmailConfigurationFactory = new Mock<IEmailConfigurationFactory>();
+            _sendMailService = new SendMailService(_mockSmtpClient.Object, _mockEmailConfigurationFactory.Object);
             _entities = UserFakeDataSeed.FakeDataUserSeed(300);
         }
         #endregion
@@ -720,6 +742,217 @@ namespace JobsOffer.Api.Test
         }
         #endregion
 
+        #endregion
+
+        #region SEND MAILS
+        [Fact]
+        public async Task SendMail_ShouldSendAndReturnNull_WhenEmailMessageIsNull()
+        {
+            try
+            {
+                // Arrange
+                EmailMessage? emailMessage = null;
+                _mockEmailConfigurationFactory.Setup(x => x.GetEmailConfiguration()).Returns(_emailConfiguration);
+
+                // Act
+                var response = await _sendMailService.Send(emailMessage);
+
+                // Assert
+                Assert.Null(response);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        [Fact]
+        public async Task SendMail_ShouldSendAndReturnNull_WhenEmailMessageToAddressesIsNullAndFromAddressesIsEmpty()
+        {
+            try
+            {
+                // Arrange
+#pragma warning disable CS8625 // Impossible de convertir un littéral ayant une valeur null en type référence non-nullable.
+                var emailMessage = new EmailMessage()
+                {
+                    ToAddresses = null,
+                    FromAddresses = new List<EmailAddress>()
+                };
+#pragma warning restore CS8625 // Impossible de convertir un littéral ayant une valeur null en type référence non-nullable.
+                _mockEmailConfigurationFactory.Setup(x => x.GetEmailConfiguration()).Returns(_emailConfiguration);
+
+                // Act
+                var response = await _sendMailService.Send(emailMessage);
+
+                // Assert
+                Assert.Null(response);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        [Fact]
+        public async Task SendMail_ShouldSendAndReturnNull_WhenEmailMessageToAddressesIsEmptyAndFromAddressesIsNull()
+        {
+            try
+            {
+                // Arrange
+#pragma warning disable CS8625 // Impossible de convertir un littéral ayant une valeur null en type référence non-nullable.
+                var emailMessage = new EmailMessage()
+                {
+                    ToAddresses = new List<EmailAddress>(),
+                    FromAddresses = null
+                };
+#pragma warning restore CS8625 // Impossible de convertir un littéral ayant une valeur null en type référence non-nullable.
+                _mockEmailConfigurationFactory.Setup(x => x.GetEmailConfiguration()).Returns(_emailConfiguration);
+
+                // Act
+                var response = await _sendMailService.Send(emailMessage);
+
+                // Assert
+                Assert.Null(response);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        [Fact]
+        public async Task SendMail_ShouldSendAndReturnNull_WhenEmailConfigurationFactorySmtpServerIsNull()
+        {
+            try
+            {
+                // Arrange
+                var emailMessage = new EmailMessage()
+                {
+                    ToAddresses = new List<EmailAddress>()
+                    {
+                        new()
+                        {
+                            Name = "Marouane",
+                            Address = "marouane@test.com"
+                        }
+                    },
+                    FromAddresses = new List<EmailAddress>()
+                    {
+                        new()
+                        {
+                            Name = "Ahmed",
+                            Address = "ahmed@test.com"
+                        }
+                    },
+                    Subject = "Test Email Subject",
+                    Content = "Test Email Content"
+                };
+                EmailConfiguration? emailConfiguration = new()
+                {
+                    SmtpServer = null,
+                    SmtpPort = 1025
+                };
+                _mockEmailConfigurationFactory.Setup(x => x.GetEmailConfiguration()).Returns(emailConfiguration);
+
+                // Act
+                var response = await _sendMailService.Send(emailMessage);
+
+                // Assert
+                Assert.Null(response);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        [Fact]
+        public async Task SendMail_ShouldSendAndReturnNull_WhenEmailConfigurationFactorySmtpPortEqualsZero()
+        {
+            try
+            {
+                // Arrange
+                var emailMessage = new EmailMessage()
+                {
+                    ToAddresses = new List<EmailAddress>()
+                    {
+                        new()
+                        {
+                            Name = "User 1",
+                            Address = "user1@test.com"
+                        }
+                    },
+                    FromAddresses = new List<EmailAddress>()
+                    {
+                        new()
+                        {
+                            Name = "User 2",
+                            Address = "user2@test.com"
+                        }
+                    },
+                    Subject = "Test Email Subject",
+                    Content = "Test Email Content"
+                };
+                EmailConfiguration? emailConfiguration = new()
+                {
+                    SmtpServer = "localhost",
+                    SmtpPort = 0
+                };
+                _mockEmailConfigurationFactory.Setup(x => x.GetEmailConfiguration()).Returns(emailConfiguration);
+
+                // Act
+                var response = await _sendMailService.Send(emailMessage);
+
+                // Assert
+                Assert.Null(response);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
+        [Fact]
+        public async Task SendMail_ShouldSendAndReturnResponse_WhenEmailConfigurationFactoryIsWellSetAndEmailMessageIsNotNullAndWellSet()
+        {
+            try
+            {
+                // Arrange
+                var emailMessage = new EmailMessage()
+                {
+                    ToAddresses = new List<EmailAddress>()
+                    {
+                        new()
+                        {
+                            Name = "User 1",
+                            Address = "user1@test.com"
+                        }
+                    },
+                    FromAddresses = new List<EmailAddress>()
+                    {
+                        new()
+                        {
+                            Name = "User 2",
+                            Address = "user2@test.com"
+                        }
+                    },
+                    Subject = "Test Email Subject",
+                    Content = "Test Email Content"
+                };
+                _mockEmailConfigurationFactory.Setup(x => x.GetEmailConfiguration()).Returns(_emailConfiguration);
+                _mockSmtpClient.Setup(x => x.SendAsync(It.IsAny<MimeMessage>(), It.IsAny<CancellationToken>(), It.IsAny<ITransferProgress>())).ReturnsAsync("Email Sent !");
+
+                // Act
+                var response = await _sendMailService.Send(emailMessage);
+
+                // Assert
+                Assert.NotNull(response);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
         #endregion
     }
 }
