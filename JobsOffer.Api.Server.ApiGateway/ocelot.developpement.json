@@ -5,8 +5,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "domainjobmicroserviceapi.local",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5284
         }
       ],
       "UpstreamPathTemplate": "/DomainJob/{everything}",
@@ -17,8 +17,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "favorimicroserviceapi.local",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 25751
         }
       ],
       "UpstreamPathTemplate": "/Favori/{everything}",
@@ -29,8 +29,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "jobmicroserviceapi.local",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 61613
         }
       ],
       "UpstreamPathTemplate": "/Job/{everything}",
@@ -41,8 +41,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "profilmicroserviceapi.local",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 57242
         }
       ],
       "UpstreamPathTemplate": "/Profil/{everything}",
@@ -53,8 +53,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "profildomainjobmicroserviceapi.local",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 39099
         }
       ],
       "UpstreamPathTemplate": "/ProfilDomainJob/{everything}",
@@ -65,8 +65,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "websitemicroserviceapi.local",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 29729
         }
       ],
       "UpstreamPathTemplate": "/WebSite/{everything}",
@@ -77,8 +77,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "usermicroserviceapi.local",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 10448
         }
       ],
       "UpstreamPathTemplate": "/User/{everything}",
@@ -89,8 +89,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "usermicroserviceapi.local",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 10448
         }
       ],
       "UpstreamPathTemplate": "/realTimeHub",
@@ -98,6 +98,6 @@
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://apigateway.local"
+    "BaseUrl": "http://localhost:40000"
   }
 }
