@@ -14,7 +14,10 @@ builder.Services.AddControllers()
                     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddMemoryCache();
+builder.Services.AddMemoryCache(options =>
+{
+    options.SizeLimit = 1024 * 1024 * 1000;
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSWAGGER();
 builder.Services.AddConnection(builder.Configuration, builder.Environment);

@@ -5,6 +5,6 @@
   </PropertyGroup>
   <PropertyGroup>
     <ActiveDebugProfile>IIS Express</ActiveDebugProfile>
-    <NameOfLastUsedPublishProfile>C:\Users\MelPC\source\repos\JobsOffer.Api.Server\JobsOffer.Api.Server.WebSiteMicroService\Properties\PublishProfiles\IISProfile.pubxml</NameOfLastUsedPublishProfile>
+    <NameOfLastUsedPublishProfile>C:\Users\MelPC\source\repos\JobsOffer.Api.Server\JobsOffer.Api.Server.WebSiteMicroService\Properties\PublishProfiles\WebSiteMicroService.pubxml</NameOfLastUsedPublishProfile>
   </PropertyGroup>
 </Project>

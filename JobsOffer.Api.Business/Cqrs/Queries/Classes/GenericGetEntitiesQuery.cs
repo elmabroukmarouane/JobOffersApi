@@ -4,7 +4,6 @@ using JobsOffer.Api.Infrastructure.DatabaseContext.DbContextJobsOffer;
 using JobsOffer.Api.Infrastructure.Models.Classes;
 using JobsOffer.Api.UnitOfWork.UnitOfWork.Interface;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using System.Linq.Expressions;
@@ -61,7 +60,10 @@ namespace JobsOffer.Api.Business.Cqrs.Queries.Classes
                         if (!string.IsNullOrEmpty(serializedData))
                         {
                             var cachedDistributedListData = JsonSerializer.Deserialize<IList<TEntity>>(serializedData);
-                            _cache.Set(CacheKey!, cachedDistributedListData);
+                            _cache.Set(CacheKey!, cachedDistributedListData, new MemoryCacheEntryOptions
+                            {
+                                Priority = CacheItemPriority.NeverRemove
+                            });
                             return GetEntities(cachedDistributedListData, expression, orberBy, includes ?? GetIncludes(), splitChar, disableTracking, take, offset);
                         }
                     }
@@ -70,7 +72,10 @@ namespace JobsOffer.Api.Business.Cqrs.Queries.Classes
                     {
                         var includesString = GetIncludes();
                         var cachedSettedListData = _unitOfWork.GetGenericRepository<TEntity>().GetEntitiesAsync(expression: null, orberBy: null, includesString, splitChar, disableTracking, take: 0, offset: 0).ToList();
-                        _cache.Set(CacheKey!, cachedSettedListData);
+                        _cache.Set(CacheKey!, cachedSettedListData, new MemoryCacheEntryOptions
+                        {
+                            Priority = CacheItemPriority.NeverRemove
+                        });
                         return GetEntities(cachedSettedListData, expression, orberBy, includes ?? includesString, splitChar, disableTracking, take, offset);
                     }
                 }
@@ -87,7 +92,10 @@ namespace JobsOffer.Api.Business.Cqrs.Queries.Classes
             {
                 var includesString = GetIncludes();
                 var cachedListData = _unitOfWork.GetGenericRepository<TEntity>().GetEntitiesAsync(expression: null, orberBy: null, includesString, splitChar: ",", disableTracking: true, take: 0, offset: 0).ToList();
-                _cache!.Set(CacheKey!, cachedListData);
+                _cache!.Set(CacheKey!, cachedListData, new MemoryCacheEntryOptions
+                {
+                    Priority = CacheItemPriority.NeverRemove
+                });
                 return GetEntities(cachedListData, expression: null, orberBy: null, includesString, splitChar: ",", disableTracking: true, take: 0, offset: 0);
             }
             return cachedLocalListData.AsQueryable();
